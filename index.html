@@ -553,12 +553,13 @@
             <!-- Painel Administrativo (TSE/TRE) -->
             <section id="admin" class="painel-admin" style="display: none;">
                 <h2 class="cartao-titulo">Painel Administrativo</h2>
-                
-                <div class="admin-tabs">
-                    <button class="admin-tab ativo" onclick="mudarAdminTab('tse')">TSE Nacional</button>
-                    <button class="admin-tab" onclick="mudarAdminTab('tre')">TRE Estadual</button>
-                    <button class="admin-tab" onclick="mudarAdminTab('eleicoes')">Controle de Eleições</button>
-                </div>
+
+<!-- Painel Administrativo -->
+<div class="admin-tabs">
+    <button class="admin-tab ativo" onclick="mudarAdminTab('tse', event)">TSE Nacional</button>
+    <button class="admin-tab" onclick="mudarAdminTab('tre', event)">TRE Estadual</button>
+    <button class="admin-tab" onclick="mudarAdminTab('eleicoes', event)">Controle de Eleições</button>
+</div>
                 
                 <!-- Painel TSE -->
                 <div id="adminTSE" class="admin-conteudo">
@@ -622,12 +623,12 @@
     </div>
 
     <!-- Tabs Flutuantes -->
-    <div class="tabs-flutuantes">
-        <button class="tab ativo" onclick="mostrarSecao('dashboard')">Dashboard</button>
-        <button class="tab" onclick="mostrarSecao('candidatura')">Candidatura</button>
-        <button class="tab" onclick="mostrarSecao('listagem')">Ver Candidatos</button>
-        <button class="tab" onclick="mostrarSecao('admin')" id="botaoAdmin" style="display: none;">Administrativo</button>
-    </div>
+<div class="tabs-flutuantes">
+    <button class="tab ativo" onclick="mostrarSecao('dashboard', event)">Dashboard</button>
+    <button class="tab" onclick="mostrarSecao('candidatura', event)">Candidatura</button>
+    <button class="tab" onclick="mostrarSecao('listagem', event)">Ver Candidatos</button>
+    <button class="tab" onclick="mostrarSecao('admin', event)" id="botaoAdmin" style="display: none;">Administrativo</button>
+</div>
 
     <!-- Modal de Login -->
     <div id="modalLogin" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
@@ -665,14 +666,14 @@
         // CONFIGURAÇÃO FIREBASE
         // ==================================================
         const firebaseConfig = {
-            apiKey: "AIzaSyC-valid-key-needs-to-be-configured",
-            authDomain: "candidatura-cde.firebaseapp.com",
-            databaseURL: "https://candidatura-cde-default-rtdb.firebaseio.com",
-            projectId: "candidatura-cde",
-            storageBucket: "candidatura-cde.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456"
-        };
+  apiKey: "AIzaSyAwFLV5X9ICB3mvU4WU1ihxGUeG9UsrbtQ",
+  authDomain: "candidatura-cde.firebaseapp.com",
+  databaseURL: "https://candidatura-cde-default-rtdb.firebaseio.com",
+  projectId: "candidatura-cde",
+  storageBucket: "candidatura-cde.firebasestorage.app",
+  messagingSenderId: "958958180950",
+  appId: "1:958958180950:web:51427276d0a83978fdb9f7"
+};
         
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -796,35 +797,53 @@
         // ==================================================
         // NAVEGAÇÃO E INTERFACE
         // ==================================================
-        function mostrarSecao(secao) {
-            // Esconder todas as seções principais
-            document.querySelectorAll('main > section, .painel-admin').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            // Mostrar a seção selecionada
-            document.getElementById(secao).style.display = 'block';
-            
-            // Atualizar tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('ativo');
-            });
-            event.target.classList.add('ativo');
-            
-            // Ações específicas por seção
-            if (secao === 'listagem') {
-                filtrarCandidatos();
-            } else if (secao === 'dashboard') {
-                atualizarDashboard();
+        function mostrarSecao(secao, event) {
+    // Esconder todas as seções principais
+    document.querySelectorAll('main > section, .painel-admin').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Mostrar a seção selecionada
+    document.getElementById(secao).style.display = 'block';
+    
+    // Atualizar tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('ativo');
+    });
+    
+    // Verificar se event existe antes de acessar target
+    if (event && event.target) {
+        event.target.classList.add('ativo');
+    } else {
+        // Se não houver event, encontrar o botão correspondente
+        document.querySelectorAll('.tab').forEach(tab => {
+            if (tab.textContent.trim().toLowerCase().includes(secao.toLowerCase()) || 
+                (tab.textContent === 'Dashboard' && secao === 'dashboard')) {
+                tab.classList.add('ativo');
             }
+        });
+    }
+    
+    // Ações específicas por seção
+    if (secao === 'listagem') {
+        filtrarCandidatos();
+    } else if (secao === 'dashboard') {
+        atualizarDashboard();
+    }
         }
         
-        function mudarAdminTab(tab) {
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
-            document.querySelectorAll('.admin-conteudo').forEach(c => c.style.display = 'none');
-            
-            event.target.classList.add('ativo');
-            document.getElementById(`admin${tab.toUpperCase()}`).style.display = 'block';
+        function mudarAdminTab(tab, event) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
+    document.querySelectorAll('.admin-conteudo').forEach(c => c.style.display = 'none');
+    
+    if (event && event.target) {
+        event.target.classList.add('ativo');
+    } else {
+        // Fallback se não houver event
+        document.querySelector(`.admin-tab[onclick*="${tab}"]`).classList.add('ativo');
+    }
+    
+    document.getElementById(`admin${tab.toUpperCase()}`).style.display = 'block';
         }
         
         // ==================================================
@@ -986,7 +1005,7 @@
             container.appendChild(select);
         }
         
-        function avancarParaEtapa2() {
+                        function avancarParaEtapa2() {
 /**
  * Função auxiliar para converter arquivo em string Base64
  * (Permite salvar a imagem no Realtime Database sem Storage externo)
@@ -1000,126 +1019,7 @@ const lerArquivoComoBase64 = (file) => new Promise((resolve, reject) => {
 
 async function avancarParaEtapa2() {
     // 1. Validação de Campos Obrigatórios
-    const campos = [
-        { id: 'nomeCandidato', label: 'Nome' },
-        { id: 'tiktokCandidato', label: 'TikTok' },
-        { id: 'tipoEleicao', label: 'Tipo de Eleição' },
-        { id: 'cargo', label: 'Cargo' },
-        { id: 'estado', label: 'Estado' },
-        { id: 'ideologia', label: 'Ideologia' },
-        { id: 'partido', label: 'Partido' },
-        { id: 'numeroCandidato', label: 'Número' }
-    ];
-
-    const tipoEleicao = document.getElementById('tipoEleicao').value;
-    
-    // Adiciona validação de município apenas se for eleição municipal
-    if (tipoEleicao === 'municipal') {
-        campos.push({ id: 'municipio', label: 'Município' });
-    }
-
-    for (const campo of campos) {
-        const elemento = document.getElementById(campo.id);
-        if (!elemento.value.trim()) {
-            alert(`Por favor, preencha o campo: ${campo.label}`);
-            elemento.focus();
-            return;
-        }
-    }
-
-    // 2. Validação da Foto (Obrigatória e Processamento)
-    const inputFoto = document.getElementById('fotoCandidato');
-    if (!inputFoto.files || !inputFoto.files[0]) {
-        alert('A foto do candidato é obrigatória.');
-        inputFoto.focus();
-        return;
-    }
-
-    // Processar imagem (Loading visual simples)
-    const btnContinuar = document.querySelector('#etapa1 .btn-primario');
-    const textoOriginal = btnContinuar.innerText;
-    btnContinuar.innerText = "Processando foto...";
-    btnContinuar.disabled = true;
-
-    let fotoBase64 = null;
-    try {
-        fotoBase64 = await lerArquivoComoBase64(inputFoto.files[0]);
-    } catch (erro) {
-        alert('Erro ao processar a imagem. Tente um arquivo menor ou outro formato.');
-        btnContinuar.innerText = textoOriginal;
-        btnContinuar.disabled = false;
-        return;
-    }
-
-    // 3. Validação Rigorosa do Número
-    const cargo = document.getElementById('cargo').value;
-    const numeroCandidato = document.getElementById('numeroCandidato').value;
-    const partidoNumero = document.getElementById('partido').value;
-
-    // Regra: Deputados e Vereadores devem respeitar o tamanho fixo
-    if (['deputado_federal', 'deputado_estadual', 'vereador'].includes(cargo)) {
-        // Deputado Federal = 4 dígitos (2 partido + 2 próprios) ou 5 dígitos? 
-        // Padrão BR: Dep. Federal (4), Estadual (5), Vereador (5). 
-        // O código anterior usava 5 e 6. Mantendo a lógica do código anterior para consistência:
-        const tamanhoEsperado = (cargo === 'deputado_federal') ? 5 : 6; // Ex: 22 + XXX
-
-        if (numeroCandidato.length !== tamanhoEsperado) {
-            alert(`Número inválido para ${cargo.replace('_', ' ')}. O número deve ter exatamente ${tamanhoEsperado} dígitos.`);
-            btnContinuar.innerText = textoOriginal;
-            btnContinuar.disabled = false;
-            return;
-        }
-        
-        if (!numeroCandidato.startsWith(partidoNumero)) {
-            alert(`O número deve começar obrigatoriamente com ${partidoNumero} (número do partido).`);
-            btnContinuar.innerText = textoOriginal;
-            btnContinuar.disabled = false;
-            return;
-        }
-    }
-
-    // 4. Construção do Objeto
-    candidaturaAtual = {
-        nome: document.getElementById('nomeCandidato').value.trim(),
-        tiktok: document.getElementById('tiktokCandidato').value.trim(),
-        tipoEleicao: tipoEleicao,
-        cargo: cargo,
-        estado: document.getElementById('estado').value,
-        municipio: (tipoEleicao === 'municipal') ? document.getElementById('municipio').value.trim() : null,
-        ideologia: document.getElementById('ideologia').value,
-        partido: partidoNumero,
-        numero: numeroCandidato,
-        coligacao: [...coligacaoPartidos], // Cópia do array para evitar referência
-        foto: fotoBase64, // AGORA SALVA A IMAGEM REAL, NÃO O NOME
-        data: new Date().toISOString(),
-        status: 'analise'
-    };
-
-    // 5. Configuração da Etapa 2 (UI)
-    const tituloEtapa2 = document.getElementById('tituloEtapa2');
-    const explicacaoSuplente = document.getElementById('explicacaoSuplente');
-    
-    // Lista de cargos majoritários que exigem VICE
-    const cargosMajoritarios = ['presidente', 'governador', 'prefeito'];
-
-    if (cargosMajoritarios.includes(candidaturaAtual.cargo)) {
-        tituloEtapa2.textContent = 'Registro do Vice-Candidato (Obrigatório)';
-        explicacaoSuplente.style.display = 'none';
-    } else {
-        tituloEtapa2.textContent = 'Registro do Suplente (Obrigatório)';
-        explicacaoSuplente.style.display = 'block'; // Mostra o box de explicação
-    }
-
-    // 6. Transição de Tela
-    btnContinuar.innerText = textoOriginal;
-    btnContinuar.disabled = false;
-    
-    document.getElementById('etapa1').classList.remove('ativa');
-    document.getElementById('etapa2').classList.add('ativa');
-    etapaAtual = 2;
-    
-    // Scroll para o topo suave
-    document.querySelector('#candidatura').scrollIntoView({ behavior: 'smooth' });
+    // ... resto do código
 }
         
         function voltarParaEtapa1() {
@@ -1290,6 +1190,62 @@ async function avancarParaEtapa2() {
                 
 async function filtrarCandidatos() {
     const estado = document.getElementById('filtroEstado').value;
+    const cargo = document.getElementById('filtroCargo').value;    
+    try {
+        const snapshot = await database.ref('candidaturas').once('value');
+        const candidaturas = snapshot.val() || {};
+        const container = document.getElementById('listaCandidatosContainer');
+        
+        container.innerHTML = '';
+        
+        const porStatus = {
+            homologado: [],
+            analise: [],
+            recusado: []
+        };
+        
+        Object.values(candidaturas).forEach(cand => {
+            if (estado && cand.estado !== estado) return;
+            if (cargo && cand.cargo !== cargo) return;
+            if (status && cand.status !== status) return;
+            porStatus[cand.status].push(cand);
+        });
+        
+        for (const [statusKey, candidatos] of Object.entries(porStatus)) {
+            if (candidatos.length === 0) continue;
+            
+            const statusTxt = { homologado: 'Homologados', analise: 'Em Análise', recusado: 'Recusados' }[statusKey];
+            const statusColor = { homologado: '#27AE60', analise: '#F39C12', recusado: '#E74C3C' }[statusKey];
+            
+            const section = document.createElement('div');
+            section.style.marginBottom = '30px';
+            
+            section.innerHTML = `
+                <h3 style="color: ${statusColor}; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid ${statusColor}20;">
+                    ${statusTxt} (${candidatos.length})
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                    ${candidatos.map(cand => `
+                        <div class="candidato-card status-${statusKey}">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width: 65px; height: 65px; border-radius: 12px; overflow: hidden; background: #eee; flex-shrink: 0; border: 1px solid #ddd;">
+                                    ${cand.foto ? 
+                                        `<img src="${cand.foto}" style="width: 100%; height: 100%; object-fit: cover;">` : 
+                                        `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:1.5em;">👤</div>`
+                                    }
+                                </div>
+                                
+                                <div style="flex: 1;">
+                                    <strong style="font-size: 1.1em; display: block;">${cand.nome}</strong>
+                                    <span style="font-size: 0.85em; color: #666;">${cand.cargo.replace('_', ' ')} • ${cand.estado}</span>
+                                </div>
+
+                                <div style="background: ${PARTIDOS_MAP[cand.ideologia]?.find(p => p.number === cand.partido)?.color || '#666'}; 
+                                        color: white; padding: 4px 8px; border-radius: 8px; font-size: 0.9em; font-weight: 900;">
+                                    ${cand.numero}
+                                </div>
+async function filtrarCandidatos() {
+    const estado = document.getElementById('filtroEstado').value;
     const cargo = document.getElementById('filtroCargo').value;
     const status = document.getElementById('filtroStatus').value;
     
@@ -1371,9 +1327,14 @@ async function filtrarCandidatos() {
             `;
             container.appendChild(section);
         }
+        
+        if (container.innerHTML === '') {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Nenhum candidato encontrado com os filtros selecionados.</div>';
+        }
+        
     } catch (error) {
         console.error('Erro ao filtrar candidatos:', error);
-        document.getElementById('listaCandidatosContainer').innerHTML = '<div style="color: #E74C3C; text-align: center;">Erro crítico ao carregar banco de dados.</div>';
+        document.getElementById('listaCandidatosContainer').innerHTML = '<div style="color: #E74C3C; text-align: center;">Erro ao carregar candidatos.</div>';
     }
 }
         
@@ -1632,4 +1593,4 @@ async function filtrarCandidatos() {
         }
     </script>
 </body>
-    </html>
+</html>
