@@ -554,11 +554,10 @@
             <section id="admin" class="painel-admin" style="display: none;">
                 <h2 class="cartao-titulo">Painel Administrativo</h2>
 
-<!-- Painel Administrativo -->
 <div class="admin-tabs">
-    <button class="admin-tab ativo" onclick="mudarAdminTab('tse', event)">TSE Nacional</button>
-    <button class="admin-tab" onclick="mudarAdminTab('tre', event)">TRE Estadual</button>
-    <button class="admin-tab" onclick="mudarAdminTab('eleicoes', event)">Controle de Eleições</button>
+    <button class="admin-tab ativo" onclick="mudarAdminTab('tse', this)">TSE Nacional</button>
+    <button class="admin-tab" onclick="mudarAdminTab('tre', this)">TRE Estadual</button>
+    <button class="admin-tab" onclick="mudarAdminTab('eleicoes', this)">Controle de Eleições</button>
 </div>
                 
                 <!-- Painel TSE -->
@@ -624,10 +623,10 @@
 
     <!-- Tabs Flutuantes -->
 <div class="tabs-flutuantes">
-    <button class="tab ativo" onclick="mostrarSecao('dashboard', event)">Dashboard</button>
-    <button class="tab" onclick="mostrarSecao('candidatura', event)">Candidatura</button>
-    <button class="tab" onclick="mostrarSecao('listagem', event)">Ver Candidatos</button>
-    <button class="tab" onclick="mostrarSecao('admin', event)" id="botaoAdmin" style="display: none;">Administrativo</button>
+    <button class="tab ativo" onclick="mostrarSecao('dashboard', this)">Dashboard</button>
+    <button class="tab" onclick="mostrarSecao('candidatura', this)">Candidatura</button>
+    <button class="tab" onclick="mostrarSecao('listagem', this)">Ver Candidatos</button>
+    <button class="tab" onclick="mostrarSecao('admin', this)" id="botaoAdmin" style="display: none;">Administrativo</button>
 </div>
 
     <!-- Modal de Login -->
@@ -795,30 +794,43 @@
         }
         
         // ==================================================
-        // NAVEGAÇÃO E INTERFACE
-        // ==================================================
-        function mostrarSecao(secao, event) {
+// NAVEGAÇÃO E INTERFACE
+// ==================================================
+function mostrarSecao(secao, eventElement = null) {
+    console.log('Mostrando seção:', secao);
+    
     // Esconder todas as seções principais
     document.querySelectorAll('main > section, .painel-admin').forEach(el => {
         el.style.display = 'none';
     });
     
     // Mostrar a seção selecionada
-    document.getElementById(secao).style.display = 'block';
+    const secaoElement = document.getElementById(secao);
+    if (secaoElement) {
+        secaoElement.style.display = 'block';
+        console.log('Seção exibida:', secao);
+    } else {
+        console.error('Seção não encontrada:', secao);
+        return;
+    }
     
-    // Atualizar tabs
+    // Atualizar tabs flutuantes
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.remove('ativo');
     });
     
-    // Verificar se event existe antes de acessar target
-    if (event && event.target) {
-        event.target.classList.add('ativo');
+    // Ativar a tab correspondente
+    if (eventElement) {
+        eventElement.classList.add('ativo');
     } else {
-        // Se não houver event, encontrar o botão correspondente
-        document.querySelectorAll('.tab').forEach(tab => {
-            if (tab.textContent.trim().toLowerCase().includes(secao.toLowerCase()) || 
-                (tab.textContent === 'Dashboard' && secao === 'dashboard')) {
+        // Encontrar a tab correspondente à seção
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            const texto = tab.textContent.toLowerCase();
+            if ((secao === 'dashboard' && texto.includes('dashboard')) ||
+                (secao === 'candidatura' && texto.includes('candidatura')) ||
+                (secao === 'listagem' && texto.includes('ver candidatos')) ||
+                (secao === 'admin' && texto.includes('administrativo'))) {
                 tab.classList.add('ativo');
             }
         });
@@ -829,22 +841,74 @@
         filtrarCandidatos();
     } else if (secao === 'dashboard') {
         atualizarDashboard();
-    }
+    } else if (secao === 'admin' && usuarioLogado) {
+        // Se for admin, mostrar a tab correta
+        if (usuarioLogado.tipo === 'tse') {
+            document.getElementById('adminTSE').style.display = 'block';
+        } else {
+            document.getElementById('adminTRE').style.display = 'block';
         }
+    }
+}
         
-        function mudarAdminTab(tab, event) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
-    document.querySelectorAll('.admin-conteudo').forEach(c => c.style.display = 'none');
+        function mudarAdminTab(tab, eventElement = null) {
+    console.log('Mudando para tab:', tab);
     
-    if (event && event.target) {
-        event.target.classList.add('ativo');
+    // Remover classe ativa de todas as tabs
+    document.querySelectorAll('.admin-tab').forEach(t => {
+        t.classList.remove('ativo');
+    });
+    
+    // Esconder todos os conteúdos
+    document.querySelectorAll('.admin-conteudo').forEach(c => {
+        c.style.display = 'none';
+    });
+    
+    // Ativar tab clicada
+    if (eventElement) {
+        eventElement.classList.add('ativo');
     } else {
-        // Fallback se não houver event
-        document.querySelector(`.admin-tab[onclick*="${tab}"]`).classList.add('ativo');
+        // Ativar por seletor
+        const tabElement = document.querySelector(`.admin-tab[onclick*="${tab}"]`);
+        if (tabElement) {
+            tabElement.classList.add('ativo');
+        }
     }
     
-    document.getElementById(`admin${tab.toUpperCase()}`).style.display = 'block';
+    // Mostrar conteúdo correspondente
+    const conteudoId = `admin${tab.toUpperCase()}`;
+    const conteudoElement = document.getElementById(conteudoId);
+    if (conteudoElement) {
+        conteudoElement.style.display = 'block';
+        console.log('Conteúdo exibido:', conteudoId);
+    } else {
+        console.error('Conteúdo não encontrado:', conteudoId);
+    }
         }
+
+        // ==================================================
+// DEBUG E TESTES
+// ==================================================
+function testarNavegacao() {
+    console.log('=== TESTE DE NAVEGAÇÃO ===');
+    console.log('Seções disponíveis:');
+    ['dashboard', 'candidatura', 'listagem', 'admin'].forEach(secao => {
+        const el = document.getElementById(secao);
+        console.log(`- ${secao}:`, el ? 'Encontrada' : 'NÃO ENCONTRADA');
+    });
+    
+    console.log('Tabs flutuantes:');
+    document.querySelectorAll('.tab').forEach((tab, i) => {
+        console.log(`Tab ${i}:`, tab.textContent, 'classe:', tab.className);
+    });
+    
+    console.log('=== FIM DO TESTE ===');
+}
+
+// Chamar após carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(testarNavegacao, 1000);
+});
         
         // ==================================================
         // DASHBOARD (TELA INICIAL)
@@ -1306,42 +1370,44 @@ async function filtrarCandidatos() {
         }
         
         async function realizarLogin() {
-            const tipo = document.getElementById('tipoAcesso').value;
-            const estado = document.getElementById('loginEstado').value;
-            const codigo = document.getElementById('codigoAcesso').value;
-            
-            // Validação básica (em produção, usar autenticação Firebase)
-            if (tipo === 'tre' && !estado) {
-                alert('Selecione um estado para acesso TRE');
-                return;
-            }
-            
-            if (!codigo) {
-                alert('Informe o código de acesso');
-                return;
-            }
-            
-            // Simulação de login (substituir por Firebase Auth)
-            usuarioLogado = {
-                tipo: tipo,
-                estado: tipo === 'tre' ? estado : null
-            };
-            
-            // Mostrar botão administrativo
-            document.getElementById('botaoAdmin').style.display = 'inline-block';
-            
-            // Configurar interface baseada no tipo
-            if (tipo === 'tse') {
-                document.getElementById('adminTSE').style.display = 'block';
-                document.getElementById('adminTRE').style.display = 'none';
-                document.getElementById('adminEleicoes').style.display = 'none';
-            } else {
-                mudarAdminTab('tre');
-            }
-            
-            fecharLogin();
-            mostrarSecao('admin');
-        }
+    const tipo = document.getElementById('tipoAcesso').value;
+    const estado = document.getElementById('loginEstado').value;
+    const codigo = document.getElementById('codigoAcesso').value;
+    
+    // Validação básica (em produção, usar autenticação Firebase)
+    if (tipo === 'tre' && !estado) {
+        alert('Selecione um estado para acesso TRE');
+        return;
+    }
+    
+    if (!codigo) {
+        alert('Informe o código de acesso');
+        return;
+    }
+    
+    // Simulação de login (substituir por Firebase Auth)
+    usuarioLogado = {
+        tipo: tipo,
+        estado: tipo === 'tre' ? estado : null
+    };
+    
+    // Mostrar botão administrativo
+    const botaoAdmin = document.getElementById('botaoAdmin');
+    botaoAdmin.style.display = 'inline-block';
+    console.log('Botão admin exibido');
+    
+    // Configurar interface baseada no tipo
+    if (tipo === 'tse') {
+        document.getElementById('adminTSE').style.display = 'block';
+        document.getElementById('adminTRE').style.display = 'none';
+        document.getElementById('adminEleicoes').style.display = 'none';
+    } else {
+        mudarAdminTab('tre', document.querySelector('.admin-tab[onclick*="tre"]'));
+    }
+    
+    fecharLogin();
+    mostrarSecao('admin', botaoAdmin);
+}
         
         async function criarPartido() {
             if (!usuarioLogado || usuarioLogado.tipo !== 'tse') {
