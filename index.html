@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+const FIREBASE_CANDIDATURAS_URL = "https://candidatura-cde-default-rtdb.firebaseio.com/candidaturas.json";
+const FIREBASE_CONFIG_URL = "https://candidatura-cde-default-rtdb.firebaseio.com/config.json";
+const FIREBASE_PARTIDOS_URL = "https://candidatura-cde-default-rtdb.firebaseio.com/partidos.json";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSE Brookasil - Sistema Eleitoral Nacional 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1546,6 +1549,18 @@
                                         </button>
                                     </div>
                                 </div>
+                                <div class="mensagem mensagem-aviso mt-30">
+                                            <i class="fas fa-sync-alt"></i>
+                                <div>
+        <strong>Controle de Sincronização:</strong> 
+        <button class="btn btn-secundario btn-pequeno ml-10" id="btnForcarSincronizacao">
+            <i class="fas fa-sync"></i> Forçar Sincronização
+        </button>
+        <button class="btn btn-secundario btn-pequeno ml-10" id="btnVerStatus">
+            <i class="fas fa-info-circle"></i> Ver Status
+        </button>
+    </div>
+</div>
                                 
                                 <div class="card">
                                     <div class="card-titulo">
@@ -1797,43 +1812,131 @@
             carregarDadosFirebase();
         });
 
-        // Funções de Inicialização
-        async function carregarDadosFirebase() {
-            try {
-                const response = await fetch(FIREBASE_URL);
-                const data = await response.json();
-                
-                if (data) {
-                    estadoSistema.candidaturas = Object.values(data);
-                    atualizarDashboard();
-                    atualizarTabelaCandidatos();
-                }
-            } catch (error) {
-                console.error("Erro ao carregar dados do Firebase:", error);
-                // Carregar dados do localStorage como fallback
-                carregarDadosLocalStorage();
-            }
+        // Funções de Inicialização - VERSÃO CORRIGIDA
+async function carregarDadosFirebase() {
+    try {
+        // Carregar candidaturas
+        const responseCandidaturas = await fetch(FIREBASE_CANDIDATURAS_URL);
+        const dataCandidaturas = await responseCandidaturas.json();
+        
+        // Carregar configuração do sistema
+        const responseConfig = await fetch(FIREBASE_CONFIG_URL);
+        const dataConfig = await responseConfig.json();
+        
+        // Carregar partidos (se existir)
+        const responsePartidos = await fetch(FIREBASE_PARTIDOS_URL);
+        const dataPartidos = await responsePartidos.json();
+        
+        if (dataCandidaturas) {
+            estadoSistema.candidaturas = Object.values(dataCandidaturas);
         }
+        
+        if (dataConfig) {
+            estadoSistema.tipoEleicaoAtual = dataConfig.tipoEleicaoAtual || null;
+            estadoSistema.eleicaoAberta = dataConfig.eleicaoAberta || false;
+            
+            // Atualizar interface imediatamente
+            atualizarStatusEleicaoUI();
+        }
+        
+        if (dataPartidos) {
+            // Opcional: carregar partidos personalizados se existirem
+            console.log("Partidos carregados do Firebase:", dataPartidos);
+        }
+        
+        atualizarDashboard();
+        atualizarTabelaCandidatos();
+        
+    } catch (error) {
+        console.error("Erro ao carregar dados do Firebase:", error);
+        // Carregar dados do localStorage como fallback
+        carregarDadosLocalStorage();
+    }
+}
 
-        async function salvarDadosFirebase() {
-            try {
-                const response = await fetch(FIREBASE_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(estadoSistema.candidaturas)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Erro ao salvar no Firebase');
-                }
-            } catch (error) {
-                console.error("Erro ao salvar no Firebase:", error);
-                // Salvar no localStorage como fallback
-                salvarDadosLocalStorage();
-            }
+        // Função para salvar configuração no Firebase
+async function salvarConfiguracaoFirebase() {
+    try {
+        const configuracao = {
+            tipoEleicaoAtual: estadoSistema.tipoEleicaoAtual,
+            eleicaoAberta: estadoSistema.eleicaoAberta,
+            ultimaAtualizacao: new Date().toISOString(),
+            atualizadoPor: estadoSistema.usuarioInfo ? estadoSistema.usuarioInfo.nome : "Sistema"
+        };
+        
+        const response = await fetch(FIREBASE_CONFIG_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(configuracao)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao salvar configuração no Firebase');
         }
+        
+        console.log("✅ Configuração salva no Firebase");
+        
+    } catch (error) {
+        console.error("Erro ao salvar configuração no Firebase:", error);
+        salvarDadosLocalStorage();
+    }
+}
+
+// Função para atualizar a UI do status da eleição
+function atualizarStatusEleicaoUI() {
+    if (document.getElementById('statusEleicao')) {
+        document.getElementById('statusEleicao').textContent = 
+            estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
+        document.getElementById('btnAlternarEleicao').innerHTML = 
+            estadoSistema.eleicaoAberta ? 
+            '<i class="fas fa-power-off"></i> Desativar Sistema' : 
+            '<i class="fas fa-power-off"></i> Ativar Sistema';
+    }
+    
+    if (document.getElementById('tipoEleicao')) {
+        document.getElementById('tipoEleicao').textContent = 
+            estadoSistema.tipoEleicaoAtual ? 
+            DADOS_SISTEMA.tiposEleicao[estadoSistema.tipoEleicaoAtual].nome.toUpperCase() : 
+            "NÃO CONFIGURADO";
+    }
+    
+    if (document.getElementById('selectTipoEleicao')) {
+        document.getElementById('selectTipoEleicao').value = estadoSistema.tipoEleicaoAtual || "";
+    }
+}
+        
+        async function salvarDadosFirebase() {
+    try {
+        // Salvar candidaturas
+        const responseCandidaturas = await fetch(FIREBASE_CANDIDATURAS_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(estadoSistema.candidaturas)
+        });
+        
+        // Salvar configuração sempre que salvar candidaturas
+        await salvarConfiguracaoFirebase();
+        
+        if (!responseCandidaturas.ok) {
+            throw new Error('Erro ao salvar no Firebase');
+        }
+        
+        console.log("✅ Dados salvos no Firebase:", {
+            candidaturas: estadoSistema.candidaturas.length,
+            eleicaoAberta: estadoSistema.eleicaoAberta,
+            tipoEleicao: estadoSistema.tipoEleicaoAtual
+        });
+        
+    } catch (error) {
+        console.error("Erro ao salvar no Firebase:", error);
+        // Salvar no localStorage como fallback
+        salvarDadosLocalStorage();
+    }
+}
 
         function carregarDadosLocalStorage() {
             const dados = localStorage.getItem('sistemaEleitoralBrookasil');
@@ -1862,11 +1965,22 @@
         }
 
         function inicializarSistema() {
-            console.log("⚡ Sistema Eleitoral Brookasil 2026 - Inicializado");
-            console.log("🔒 Versão: IA NÃO PODE ERRAR v5 — SISTEMA ANTI-BURLA");
-            document.getElementById('usuarioNome').textContent = "SISTEMA PRINCIPAL";
-            document.getElementById('usuarioCargo').textContent = "SISTEMA INICIADO";
+    console.log("⚡ Sistema Eleitoral Brookasil 2026 - Inicializado");
+    console.log("🔒 Versão: IA NÃO PODE ERRAR v5 — SISTEMA ANTI-BURLA");
+    console.log("🌐 Firebase: Conectado");
+    
+    document.getElementById('usuarioNome').textContent = "SISTEMA PRINCIPAL";
+    document.getElementById('usuarioCargo').textContent = estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
+    
+    // Verificar status inicial
+    setTimeout(() => {
+        if (!estadoSistema.eleicaoAberta) {
+            console.log("ℹ️ Sistema iniciado em modo OFFLINE");
+        } else {
+            console.log("✅ Sistema iniciado em modo ONLINE");
         }
+    }, 1000);
+}
 
         function carregarDadosIniciais() {
             // Carregar estados
@@ -1888,6 +2002,29 @@
                     }
                 });
             });
+
+            // Botão de sincronização
+document.getElementById('btnForcarSincronizacao')?.addEventListener('click', async function() {
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+    this.disabled = true;
+    
+    await salvarDadosFirebase();
+    await carregarDadosFirebase();
+    
+    this.innerHTML = '<i class="fas fa-sync"></i> Forçar Sincronização';
+    this.disabled = false;
+    alert("✅ Sincronização completa!");
+});
+
+// Botão de status
+document.getElementById('btnVerStatus')?.addEventListener('click', function() {
+    alert(`📊 Status do Sistema:
+• Candidaturas: ${estadoSistema.candidaturas.length}
+• Eleição: ${estadoSistema.eleicaoAberta ? 'ONLINE' : 'OFFLINE'}
+• Tipo: ${estadoSistema.tipoEleicaoAtual || 'Não definido'}
+• Última sincronização: ${new Date().toLocaleString()}
+• Usuários ativos: ${navigator.onLine ? 'Conectado' : 'Offline'}`);
+});
 
             // Carregar cargos
             const cargos = [
@@ -2172,14 +2309,21 @@ document.getElementById('candidatoCargo').addEventListener('change', function() 
             document.getElementById('btnLoginTRE').addEventListener('click', fazerLoginTRE);
 
             // Gerenciamento TSE
-            document.getElementById('btnAlternarEleicao').addEventListener('click', alternarStatusEleicao);
-            document.getElementById('selectTipoEleicao').addEventListener('change', function() {
-                estadoSistema.tipoEleicaoAtual = this.value;
-                document.getElementById('tipoEleicao').textContent = 
-                    this.value ? DADOS_SISTEMA.tiposEleicao[this.value].nome.toUpperCase() : "NÃO CONFIGURADO";
-                salvarDadosFirebase();
-                salvarDadosLocalStorage();
-            });
+document.getElementById('btnAlternarEleicao').addEventListener('click', alternarStatusEleicao);
+document.getElementById('selectTipoEleicao').addEventListener('change', async function() {
+    estadoSistema.tipoEleicaoAtual = this.value;
+    document.getElementById('tipoEleicao').textContent = 
+        this.value ? DADOS_SISTEMA.tiposEleicao[this.value].nome.toUpperCase() : "NÃO CONFIGURADO";
+    
+    // Salvar configuração no Firebase
+    await salvarConfiguracaoFirebase();
+    salvarDadosLocalStorage();
+    
+    // Se eleição já estava aberta, avisar sobre a mudança
+    if (estadoSistema.eleicaoAberta) {
+        alert(`⚠️ Tipo de eleição alterado para: ${DADOS_SISTEMA.tiposEleicao[this.value].nome}`);
+    }
+});
 
             // Modais
             document.getElementById('btnFecharModal').addEventListener('click', function() {
@@ -2613,46 +2757,60 @@ function gerarNumeroCandidato(numeroPartido, cargo) {
         }
 
         async function enviarCandidatura() {
-            if (!estadoSistema.eleicaoAberta) {
-                alert("⚠️ O sistema eleitoral está offline. Ative o sistema para registrar candidaturas.");
+    if (!estadoSistema.eleicaoAberta) {
+        alert("⚠️ O sistema eleitoral está offline. Ative o sistema para registrar candidaturas.");
+        
+        // Se for TSE, oferecer para ativar
+        if (estadoSistema.usuarioAutenticado && estadoSistema.tipoUsuario === 'tse') {
+            if (confirm("Deseja ativar o sistema agora?")) {
+                estadoSistema.eleicaoAberta = true;
+                atualizarStatusEleicaoUI();
+                await salvarConfiguracaoFirebase();
+                // Continuar com o envio...
+            } else {
                 return;
             }
-            
-            const dados = estadoSistema.dadosCandidatura;
-            const id = Date.now() + Math.floor(Math.random() * 1000);
-            
-            const novaCandidatura = {
-                id: id,
-                nome: dados.etapa1.nome,
-                sobrenome: dados.etapa1.sobrenome,
-                tiktok: dados.etapa1.tiktok,
-                ideologia: dados.etapa1.ideologia,
-                cargo: dados.etapa1.cargo,
-                estado: dados.etapa1.estado,
-                cidade: dados.etapa1.cidade,
-                partido: dados.etapa2.partido,
-                numero: dados.etapa2.numero,
-                vice: dados.etapa3.vice || null,
-                suplente: dados.etapa3.suplente || null,
-                status: "analise",
-                motivoRecusa: "",
-                dataRegistro: new Date().toISOString()
-            };
-            
-            estadoSistema.candidaturas.push(novaCandidatura);
-            
-            await salvarDadosFirebase();
-            salvarDadosLocalStorage();
-            
-            atualizarDashboard();
-            atualizarTabelaCandidatos();
-            
-            alert("✅ Candidatura registrada com sucesso! Status: EM ANÁLISE");
-            
-            resetarFormularioCandidatura();
-            voltarParaEtapa1();
-            navegarParaAba('dashboard');
+        } else {
+            return;
         }
+    }
+    
+    // Resto do código de envio...
+    const dados = estadoSistema.dadosCandidatura;
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    
+    const novaCandidatura = {
+        id: id,
+        nome: dados.etapa1.nome,
+        sobrenome: dados.etapa1.sobrenome,
+        tiktok: dados.etapa1.tiktok,
+        ideologia: dados.etapa1.ideologia,
+        cargo: dados.etapa1.cargo,
+        estado: dados.etapa1.estado,
+        cidade: dados.etapa1.cidade,
+        partido: dados.etapa2.partido,
+        numero: dados.etapa2.numero,
+        vice: dados.etapa3.vice || null,
+        suplente: dados.etapa3.suplente || null,
+        status: "analise",
+        motivoRecusa: "",
+        dataRegistro: new Date().toISOString()
+    };
+    
+    estadoSistema.candidaturas.push(novaCandidatura);
+    
+    await salvarDadosFirebase(); // Isso salva tanto candidaturas quanto configuração
+    salvarDadosLocalStorage();
+    
+    atualizarDashboard();
+    atualizarTabelaCandidatos();
+    
+    alert("✅ Candidatura registrada com sucesso! Status: EM ANÁLISE");
+    
+    resetarFormularioCandidatura();
+    voltarParaEtapa1();
+    navegarParaAba('dashboard');
+}
 
         function resetarFormularioCandidatura() {
             document.getElementById('candidatoNome').value = "";
