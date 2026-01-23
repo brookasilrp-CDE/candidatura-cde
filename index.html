@@ -2802,6 +2802,660 @@ input:checked + .slider:before {
             console.log("🌐 Firebase: Conectado");
         }
 
+        // Adicione estas funções no seu código JavaScript:
+
+// ============================================
+// SISTEMA DE CONTROLE DE ELEIÇÃO CORRIGIDO
+// ============================================
+
+// Referência para a configuração global
+let configEleicaoRef = null;
+
+// Inicializar sistema de eleição
+function inicializarSistemaEleicao() {
+    console.log("🔧 Inicializando sistema de eleição...");
+    
+    // Referência para configuração global
+    configEleicaoRef = database.ref('config/sistema_eleicao');
+    
+    // Ouvir mudanças em tempo real
+    configEleicaoRef.on('value', (snapshot) => {
+        const config = snapshot.val();
+        if (config) {
+            console.log("📡 Configuração de eleição recebida:", config);
+            
+            estadoSistema.eleicaoAberta = config.eleicaoAberta || false;
+            estadoSistema.tipoEleicaoAtual = config.tipoEleicao || null;
+            
+            // Atualizar UI imediatamente
+            atualizarStatusEleicaoUI();
+            
+            // Se estiver na aba de gerenciamento, atualizar controles
+            if (estadoSistema.tipoUsuario === 'tse' && 
+                document.getElementById('gerenciamento').classList.contains('ativo')) {
+                atualizarControlesEleicao();
+            }
+            
+            // Verificar se precisa notificar sobre mudança
+            if (estadoSistema.eleicaoAberta && !config.lastNotification) {
+                mostrarNotificacaoSistema();
+            }
+        }
+    }, (error) => {
+        console.error("❌ Erro ao escutar configuração:", error);
+        mostrarMensagem("Erro de conexão com servidor", "erro");
+    });
+    
+    // Carregar configuração inicial
+    carregarConfiguracaoEleicao();
+}
+
+// Carregar configuração atual
+async function carregarConfiguracaoEleicao() {
+    try {
+        const snapshot = await configEleicaoRef.once('value');
+        const config = snapshot.val();
+        
+        if (!config) {
+            // Configuração inicial padrão
+            const configInicial = {
+                eleicaoAberta: false,
+                tipoEleicao: null,
+                dataCriacao: new Date().toISOString(),
+                criadoPor: "Sistema",
+                ultimaAtualizacao: new Date().toISOString(),
+                versao: "3.0.0"
+            };
+            
+            await configEleicaoRef.set(configInicial);
+            estadoSistema.eleicaoAberta = false;
+            estadoSistema.tipoEleicaoAtual = null;
+        } else {
+            estadoSistema.eleicaoAberta = config.eleicaoAberta || false;
+            estadoSistema.tipoEleicaoAtual = config.tipoEleicao || null;
+        }
+        
+        atualizarStatusEleicaoUI();
+        
+    } catch (error) {
+        console.error("❌ Erro ao carregar configuração:", error);
+    }
+}
+
+// Função CORRIGIDA para alternar status da eleição
+async function alternarStatusEleicao() {
+    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
+        mostrarMensagem("❌ Apenas o TSE pode alterar o status do sistema", "erro");
+        return;
+    }
+    
+    const novoStatus = !estadoSistema.eleicaoAberta;
+    const btn = document.getElementById('btnAlternarEleicao');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        btn.disabled = true;
+        
+        // Atualizar no Firebase
+        await configEleicaoRef.update({
+            eleicaoAberta: novoStatus,
+            ultimaAtualizacao: new Date().toISOString(),
+            atualizadoPor: estadoSistema.usuarioInfo.nome,
+            ultimaAlteracao: {
+                tipo: 'status',
+                valor: novoStatus ? 'ATIVADO' : 'DESATIVADO',
+                data: new Date().toISOString(),
+                usuario: estadoSistema.usuarioInfo.nome
+            }
+        });
+        
+        // O listener on('value') irá atualizar automaticamente
+        console.log(`✅ Sistema ${novoStatus ? 'ATIVADO' : 'DESATIVADO'} com sucesso!`);
+        
+        // Forçar atualização imediata
+        estadoSistema.eleicaoAberta = novoStatus;
+        atualizarStatusEleicaoUI();
+        
+        // Mostrar notificação
+        mostrarMensagem(
+            novoStatus ? 
+            "🎉 SISTEMA ATIVADO - Candidaturas liberadas!" : 
+            "⏸️ SISTEMA DESATIVADO - Candidaturas bloqueadas",
+            novoStatus ? "sucesso" : "aviso"
+        );
+        
+        // Se ativou sem tipo definido, alertar
+        if (novoStatus && !estadoSistema.tipoEleicaoAtual) {
+            mostrarMensagem("⚠️ ATENÇÃO: Tipo de eleição não definido", "aviso");
+        }
+        
+    } catch (error) {
+        console.error("❌ Erro ao alternar status:", error);
+        mostrarMensagem("Erro ao atualizar sistema. Tente novamente.", "erro");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Função CORRIGIDA para alterar tipo de eleição
+async function alterarTipoEleicao(novoTipo) {
+    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
+        mostrarMensagem("❌ Apenas o TSE pode alterar o tipo de eleição", "erro");
+        return;
+    }
+    
+    try {
+        // Atualizar no Firebase
+        await configEleicaoRef.update({
+            tipoEleicao: novoTipo,
+            ultimaAtualizacao: new Date().toISOString(),
+            atualizadoPor: estadoSistema.usuarioInfo.nome,
+            ultimaAlteracao: {
+                tipo: 'tipo_eleicao',
+                valor: novoTipo,
+                data: new Date().toISOString(),
+                usuario: estadoSistema.usuarioInfo.nome
+            }
+        });
+        
+        // O listener irá atualizar automaticamente
+        console.log(`✅ Tipo de eleição alterado para: ${novoTipo}`);
+        
+        // Mostrar notificação
+        mostrarMensagem(
+            `✅ Tipo de eleição definido: ${novoTipo === 'municipal' ? 'Municipal' : 'Federal'}`,
+            "sucesso"
+        );
+        
+        // Se sistema estava ativo, notificar sobre a mudança
+        if (estadoSistema.eleicaoAberta) {
+            setTimeout(() => {
+                mostrarMensagem(
+                    `ℹ️ Sistema atualizado para: ${novoTipo === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}`,
+                    "aviso"
+                );
+            }, 1000);
+        }
+        
+    } catch (error) {
+        console.error("❌ Erro ao alterar tipo de eleição:", error);
+        mostrarMensagem("Erro ao atualizar tipo de eleição", "erro");
+    }
+}
+
+// Atualizar UI do status da eleição
+function atualizarStatusEleicaoUI() {
+    // Atualizar cabeçalho do sistema
+    document.getElementById('usuarioCargo').textContent = 
+        estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
+    
+    // Atualizar na aba de gerenciamento (se visível)
+    const statusEleicaoEl = document.getElementById('statusEleicao');
+    const btnAlternarEleicaoEl = document.getElementById('btnAlternarEleicao');
+    const tipoEleicaoEl = document.getElementById('tipoEleicao');
+    const selectTipoEleicaoEl = document.getElementById('selectTipoEleicao');
+    
+    if (statusEleicaoEl) {
+        statusEleicaoEl.textContent = 
+            estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
+        statusEleicaoEl.style.color = estadoSistema.eleicaoAberta ? "#00ff88" : "#ff5555";
+    }
+    
+    if (btnAlternarEleicaoEl) {
+        btnAlternarEleicaoEl.innerHTML = estadoSistema.eleicaoAberta ? 
+            '<i class="fas fa-power-off"></i> Desativar Sistema' : 
+            '<i class="fas fa-power-off"></i> Ativar Sistema';
+        btnAlternarEleicaoEl.style.background = estadoSistema.eleicaoAberta ? 
+            'linear-gradient(135deg, #ff5555, #ff3366)' : 
+            'linear-gradient(135deg, #00ff88, #00cc66)';
+    }
+    
+    if (tipoEleicaoEl) {
+        tipoEleicaoEl.textContent = estadoSistema.tipoEleicaoAtual ? 
+            estadoSistema.tipoEleicaoAtual.toUpperCase() : "NÃO CONFIGURADO";
+    }
+    
+    if (selectTipoEleicaoEl) {
+        selectTipoEleicaoEl.value = estadoSistema.tipoEleicaoAtual || "";
+    }
+    
+    // Atualizar todos os lugares que mostram status
+    atualizarIndicadoresStatus();
+}
+
+// Atualizar controles da eleição
+function atualizarControlesEleicao() {
+    // Garantir que os controles estão atualizados
+    atualizarStatusEleicaoUI();
+    
+    // Habilitar/desabilitar controles baseado no status
+    const selectTipo = document.getElementById('selectTipoEleicao');
+    if (selectTipo) {
+        selectTipo.disabled = false;
+    }
+}
+
+// Atualizar indicadores em todas as partes do sistema
+function atualizarIndicadoresStatus() {
+    // Atualizar status na tabela de candidaturas
+    const indicadores = document.querySelectorAll('.status-indicador');
+    indicadores.forEach(el => {
+        el.textContent = estadoSistema.eleicaoAberta ? "🟢 ONLINE" : "🔴 OFFLINE";
+        el.style.color = estadoSistema.eleicaoAberta ? "#00ff88" : "#ff5555";
+    });
+}
+
+// Mostrar notificação de sistema
+function mostrarNotificacaoSistema() {
+    if (estadoSistema.eleicaoAberta) {
+        const notificacao = document.createElement('div');
+        notificacao.className = 'notificacao-sistema';
+        notificacao.innerHTML = `
+            <div class="notificacao-conteudo">
+                <i class="fas fa-bullhorn"></i>
+                <div>
+                    <strong>🎉 SISTEMA ELETORAL ATIVADO!</strong>
+                    <p>Candidaturas agora estão abertas para: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}</p>
+                </div>
+                <button class="notificacao-fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notificacao);
+        
+        // Fechar notificação
+        notificacao.querySelector('.notificacao-fechar').addEventListener('click', () => {
+            notificacao.remove();
+        });
+        
+        // Remover automaticamente após 10 segundos
+        setTimeout(() => notificacao.remove(), 10000);
+    }
+}
+
+// Validar se candidatura pode ser enviada
+function validarCandidaturaPodeSerEnviada() {
+    if (!estadoSistema.eleicaoAberta) {
+        mostrarMensagem("❌ SISTEMA FECHADO: As candidaturas não estão sendo aceitas no momento.", "erro");
+        return false;
+    }
+    
+    if (!estadoSistema.tipoEleicaoAtual) {
+        mostrarMensagem("⚠️ Tipo de eleição não definido pelo TSE", "aviso");
+        return false;
+    }
+    
+    return true;
+}
+
+// ============================================
+// ESTILOS PARA O SISTEMA DE NOTIFICAÇÃO
+// ============================================
+const estilosNotificacao = document.createElement('style');
+estilosNotificacao.textContent = `
+.notificacao-sistema {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    background: linear-gradient(135deg, rgba(10, 15, 35, 0.95), rgba(5, 10, 25, 0.95));
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    min-width: 350px;
+    max-width: 400px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(0, 255, 136, 0.2);
+    animation: slideInRight 0.5s ease;
+    backdrop-filter: blur(10px);
+}
+
+.notificacao-conteudo {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.notificacao-conteudo i {
+    color: #00ff88;
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.notificacao-conteudo div {
+    flex: 1;
+}
+
+.notificacao-conteudo strong {
+    color: #00ff88;
+    font-size: 16px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.notificacao-conteudo p {
+    color: #b8b8d1;
+    font-size: 14px;
+    margin: 0;
+}
+
+.notificacao-fechar {
+    background: transparent;
+    border: none;
+    color: #b8b8d1;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.notificacao-fechar:hover {
+    color: #ff5555;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Indicador de status no dashboard */
+.status-indicador {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Card especial de status */
+.card-status-sistema {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-status-sistema::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00ff88, #00ccff);
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+`;
+document.head.appendChild(estilosNotificacao);
+
+// ============================================
+// MODIFICAÇÕES NO CÓDIGO EXISTENTE
+// ============================================
+
+// 1. Na inicialização, adicionar:
+document.addEventListener('DOMContentLoaded', function() {
+    // ... seu código existente ...
+    
+    // Inicializar sistema de eleição
+    setTimeout(() => inicializarSistemaEleicao(), 1000);
+    
+    // Event listeners corrigidos
+    document.getElementById('btnAlternarEleicao').addEventListener('click', alternarStatusEleicao);
+    
+    document.getElementById('selectTipoEleicao').addEventListener('change', function() {
+        const novoTipo = this.value;
+        if (novoTipo) {
+            alterarTipoEleicao(novoTipo);
+        }
+    });
+});
+
+// 2. Modificar a função de envio de candidatura:
+async function enviarCandidatura() {
+    // Verificar se sistema está aberto
+    if (!validarCandidaturaPodeSerEnviada()) {
+        return;
+    }
+    
+    // ... resto do código de envio ...
+}
+
+// 3. Adicionar verificação no formulário:
+function configurarValidacaoFormulario() {
+    // Verificar status ao carregar formulário
+    const formCandidatura = document.getElementById('candidatura');
+    if (formCandidatura) {
+        const observer = new MutationObserver(() => {
+            if (formCandidatura.classList.contains('ativo')) {
+                const btnEnviar = document.getElementById('btnEnviarCandidatura');
+                if (btnEnviar) {
+                    btnEnviar.disabled = !estadoSistema.eleicaoAberta;
+                    if (!estadoSistema.eleicaoAberta) {
+                        btnEnviar.title = "Sistema de candidaturas fechado";
+                        btnEnviar.style.opacity = "0.6";
+                    }
+                }
+            }
+        });
+        observer.observe(formCandidatura, { attributes: true, attributeFilter: ['class'] });
+    }
+}
+
+// 4. Adicionar indicador de status no dashboard:
+function adicionarIndicadorStatusDashboard() {
+    const dashboardHeader = document.querySelector('#dashboard .filtros-titulo');
+    if (dashboardHeader) {
+        const indicador = document.createElement('div');
+        indicador.className = 'status-indicador';
+        indicador.id = 'dashboardStatusIndicador';
+        indicador.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 11px;
+        `;
+        dashboardHeader.style.position = 'relative';
+        dashboardHeader.appendChild(indicador);
+        atualizarIndicadoresStatus();
+    }
+}
+
+// 5. Adicionar card de status no dashboard:
+function adicionarCardStatusDashboard() {
+    const dashboardCards = document.querySelector('.dashboard-cards');
+    if (dashboardCards) {
+        const cardStatus = document.createElement('div');
+        cardStatus.className = 'card card-status-sistema';
+        cardStatus.innerHTML = `
+            <div class="card-titulo">
+                <i class="fas fa-satellite-dish"></i>
+                STATUS DO SISTEMA
+            </div>
+            <div class="card-valor" id="cardStatusValor">
+                ${estadoSistema.eleicaoAberta ? 'ONLINE' : 'OFFLINE'}
+            </div>
+            <div class="card-detalhe" id="cardStatusDetalhe">
+                ${estadoSistema.tipoEleicaoAtual ? 
+                    `Tipo: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}` : 
+                    'Tipo não definido'}
+            </div>
+            <div class="card-detalhe mt-10">
+                <small>Atualizado: ${new Date().toLocaleTimeString()}</small>
+            </div>
+        `;
+        dashboardCards.insertBefore(cardStatus, dashboardCards.firstChild);
+    }
+}
+
+// 6. Atualizar periodicamente o status
+function iniciarAtualizacaoPeriodica() {
+    setInterval(() => {
+        if (estadoSistema.eleicaoAberta) {
+            const cardValor = document.getElementById('cardStatusValor');
+            const cardDetalhe = document.getElementById('cardStatusDetalhe');
+            if (cardValor) cardValor.textContent = 'ONLINE';
+            if (cardDetalhe) {
+                cardDetalhe.textContent = estadoSistema.tipoEleicaoAtual ? 
+                    `Tipo: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}` : 
+                    'Tipo não definido';
+            }
+        }
+    }, 30000); // Atualizar a cada 30 segundos
+}
+
+// ============================================
+// FUNÇÃO DE RESET DE SISTEMA (APENAS TSE)
+// ============================================
+async function resetarSistemaEleicao() {
+    if (!confirm("⚠️ ATENÇÃO: Isso irá resetar todo o sistema de eleição. Tem certeza?")) {
+        return;
+    }
+    
+    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
+        mostrarMensagem("❌ Apenas o TSE pode resetar o sistema", "erro");
+        return;
+    }
+    
+    try {
+        // Resetar configuração
+        await configEleicaoRef.update({
+            eleicaoAberta: false,
+            tipoEleicao: null,
+            ultimaAtualizacao: new Date().toISOString(),
+            atualizadoPor: estadoSistema.usuarioInfo.nome,
+            reset: {
+                data: new Date().toISOString(),
+                usuario: estadoSistema.usuarioInfo.nome,
+                motivo: "Reset manual pelo TSE"
+            }
+        });
+        
+        // Atualizar estado local
+        estadoSistema.eleicaoAberta = false;
+        estadoSistema.tipoEleicaoAtual = null;
+        
+        atualizarStatusEleicaoUI();
+        
+        mostrarMensagem("🔄 Sistema resetado com sucesso!", "sucesso");
+        
+    } catch (error) {
+        console.error("❌ Erro ao resetar sistema:", error);
+        mostrarMensagem("Erro ao resetar sistema", "erro");
+    }
+}
+
+// ============================================
+// ADICIONAR BOTÃO DE RESET NA INTERFACE TSE
+// ============================================
+function adicionarControleReset() {
+    const gerenciamentoContent = document.getElementById('conteudoGerenciamento');
+    if (gerenciamentoContent && estadoSistema.tipoUsuario === 'tse') {
+        // Adicionar botão de reset
+        const resetButton = document.createElement('button');
+        resetButton.className = 'btn btn-pequeno';
+        resetButton.style.cssText = `
+            background: linear-gradient(135deg, #ff5555, #ff0000);
+            color: white;
+            margin-left: 10px;
+        `;
+        resetButton.innerHTML = '<i class="fas fa-redo"></i> Resetar Sistema';
+        resetButton.addEventListener('click', resetarSistemaEleicao);
+        
+        // Encontrar o card de status e adicionar o botão
+        const statusCard = document.querySelector('.card .card-detalhe');
+        if (statusCard) {
+            statusCard.appendChild(resetButton);
+        }
+    }
+}
+
+// ============================================
+// INICIALIZAÇÃO COMPLETA
+// ============================================
+function inicializarSistemaCompleto() {
+    console.log("🚀 Iniciando sistema completo...");
+    
+    // 1. Inicializar Firebase
+    inicializarFirebase();
+    
+    // 2. Inicializar sistema de eleição
+    inicializarSistemaEleicao();
+    
+    // 3. Configurar validação do formulário
+    configurarValidacaoFormulario();
+    
+    // 4. Adicionar indicadores no dashboard
+    adicionarIndicadorStatusDashboard();
+    adicionarCardStatusDashboard();
+    
+    // 5. Iniciar atualização periódica
+    iniciarAtualizacaoPeriodica();
+    
+    // 6. Verificar se é TSE para adicionar controles extras
+    if (estadoSistema.tipoUsuario === 'tse') {
+        adicionarControleReset();
+    }
+    
+    console.log("✅ Sistema inicializado com sucesso!");
+}
+
+// Chame esta função no DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Seu código existente...
+    
+    // Depois de tudo carregado
+    setTimeout(() => inicializarSistemaCompleto(), 2000);
+});
+
+// ============================================
+// DEBUG E LOGS DO SISTEMA
+// ============================================
+function mostrarLogsSistema() {
+    console.log("=== SISTEMA DE ELEIÇÃO ===");
+    console.log("Status:", estadoSistema.eleicaoAberta ? "ONLINE" : "OFFLINE");
+    console.log("Tipo:", estadoSistema.tipoEleicaoAtual || "Não definido");
+    console.log("Usuário:", estadoSistema.usuarioInfo?.nome || "Não autenticado");
+    console.log("Tipo Usuário:", estadoSistema.tipoUsuario || "Nenhum");
+    console.log("========================");
+}
+
+// Adicionar botão de debug (apenas desenvolvimento)
+if (window.location.hostname === 'localhost') {
+    const debugBtn = document.createElement('button');
+    debugBtn.textContent = "🔧 Debug Sistema";
+    debugBtn.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 9999;
+        padding: 10px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    `;
+    debugBtn.addEventListener('click', mostrarLogsSistema);
+    document.body.appendChild(debugBtn);
+}
+
         function carregarDadosIniciais() {
             // Carregar estados
             DADOS_SISTEMA.estados.forEach(estado => {
