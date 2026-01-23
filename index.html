@@ -1743,11 +1743,11 @@
             
             senhasTRE: {
                 "BROOKHAVEN": {
-                    "Cidade Eleitoral": "tutuCE",
-                    "Liberty City": "tutuLC"
+                    "Cidade Eleitoral": "tutuCDE",
+                    "Liberty City": "caiadoLC"
                 },
                 "NOVACORE": {
-                    "Nexaville": "williamNV",
+                    "Nexaville": "williamNX",
                     "Solária": "pedroSR"
                 },
                 "CASTERÍBER": {
@@ -2005,6 +2005,112 @@
                 document.getElementById(id).addEventListener('input', validarEtapa1);
             });
 
+            // Event listener para o partido - GERA O NÚMERO AUTOMATICAMENTE
+document.getElementById('candidatoPartido').addEventListener('change', function() {
+    const partidoSelecionado = this.value;
+    const cargoSelecionado = document.getElementById('candidatoCargo').value;
+    
+    if (partidoSelecionado && cargoSelecionado) {
+        // Encontrar o partido selecionado
+        let partidoInfo = null;
+        for (const ideologia in DADOS_SISTEMA.partidos) {
+            const partido = DADOS_SISTEMA.partidos[ideologia].find(p => p.sigla === partidoSelecionado);
+            if (partido) {
+                partidoInfo = partido;
+                break;
+            }
+        }
+        
+        if (partidoInfo) {
+            // Determinar o número do candidato
+            const numeroCandidato = gerarNumeroCandidato(partidoInfo.numero, cargoSelecionado);
+            
+            // Atualizar o campo de número
+            document.getElementById('candidatoNumero').value = numeroCandidato;
+            document.getElementById('candidatoNumero').disabled = false;
+            
+            // Explicação do número gerado
+            const todosCargos = [
+                ...DADOS_SISTEMA.tiposEleicao.municipal.cargos,
+                ...DADOS_SISTEMA.tiposEleicao.federal.cargos
+            ];
+            const cargoInfo = todosCargos.find(c => c.nome === cargoSelecionado);
+            
+            if (cargoInfo) {
+                const digitosExtras = cargoInfo.digitos - 2;
+                if (digitosExtras > 0) {
+                    document.getElementById('ajudaNumero').textContent = 
+                        `Número do partido (${partidoInfo.numero.toString().padStart(2, '0')}) + ${digitosExtras} dígitos aleatórios`;
+                } else {
+                    document.getElementById('ajudaNumero').textContent = 
+                        `Número do partido (${partidoInfo.numero.toString().padStart(2, '0')})`;
+                }
+            }
+            
+            // Habilitar o botão de continuar
+            document.getElementById('btnEtapa2').disabled = false;
+            
+            // Validar etapa 2
+            validarEtapa2();
+        }
+    }
+});
+
+// Event listener para o cargo - também gera número se partido já estiver selecionado
+document.getElementById('candidatoCargo').addEventListener('change', function() {
+    const partidoSelecionado = document.getElementById('candidatoPartido').value;
+    const cargoSelecionado = this.value;
+    
+    // Se já tiver partido selecionado, gerar número novamente
+    if (partidoSelecionado && cargoSelecionado) {
+        // Encontrar o partido selecionado
+        let partidoInfo = null;
+        for (const ideologia in DADOS_SISTEMA.partidos) {
+            const partido = DADOS_SISTEMA.partidos[ideologia].find(p => p.sigla === partidoSelecionado);
+            if (partido) {
+                partidoInfo = partido;
+                break;
+            }
+        }
+        
+        if (partidoInfo) {
+            // Determinar o número do candidato
+            const numeroCandidato = gerarNumeroCandidato(partidoInfo.numero, cargoSelecionado);
+            
+            // Atualizar o campo de número
+            document.getElementById('candidatoNumero').value = numeroCandidato;
+            document.getElementById('candidatoNumero').disabled = false;
+            
+            // Explicação do número gerado
+            const todosCargos = [
+                ...DADOS_SISTEMA.tiposEleicao.municipal.cargos,
+                ...DADOS_SISTEMA.tiposEleicao.federal.cargos
+            ];
+            const cargoInfo = todosCargos.find(c => c.nome === cargoSelecionado);
+            
+            if (cargoInfo) {
+                const digitosExtras = cargoInfo.digitos - 2;
+                if (digitosExtras > 0) {
+                    document.getElementById('ajudaNumero').textContent = 
+                        `Número do partido (${partidoInfo.numero.toString().padStart(2, '0')}) + ${digitosExtras} dígitos aleatórios`;
+                } else {
+                    document.getElementById('ajudaNumero').textContent = 
+                        `Número do partido (${partidoInfo.numero.toString().padStart(2, '0')})`;
+                }
+            }
+            
+            // Habilitar o botão de continuar
+            document.getElementById('btnEtapa2').disabled = false;
+            
+            // Validar etapa 2
+            validarEtapa2();
+        }
+    }
+    
+    // Também validar etapa 1
+    validarEtapa1();
+});
+
             // Botões das etapas
             document.getElementById('btnEtapa1').addEventListener('click', avancarParaEtapa2);
             document.getElementById('btnVoltarEtapa2').addEventListener('click', voltarParaEtapa1);
@@ -2096,6 +2202,37 @@
             });
         }
 
+        // Adicione esta função nova
+function gerarNumeroCandidato(numeroPartido, cargo) {
+    // Determinar número de dígitos baseado no cargo
+    let digitosCargo = 2; // Default para cargos de 2 dígitos
+    
+    // Verificar em qual tipo de eleição está o cargo
+    for (const tipo in DADOS_SISTEMA.tiposEleicao) {
+        const cargoInfo = DADOS_SISTEMA.tiposEleicao[tipo].cargos.find(c => c.nome === cargo);
+        if (cargoInfo) {
+            digitosCargo = cargoInfo.digitos;
+            break;
+        }
+    }
+    
+    // Para cargos de 2 dígitos (majoritários), o número é apenas o do partido
+    if (digitosCargo === 2) {
+        return numeroPartido.toString().padStart(2, '0');
+    }
+    
+    // Para cargos proporcionais, gerar dígitos aleatórios para completar
+    const digitosExtras = digitosCargo - 2;
+    let numeroCompleto = numeroPartido.toString().padStart(2, '0');
+    
+    // Gerar dígitos extras aleatórios
+    for (let i = 0; i < digitosExtras; i++) {
+        numeroCompleto += Math.floor(Math.random() * 10);
+    }
+    
+    return numeroCompleto;
+}
+
         // Funções de Navegação
         function navegarParaAba(abaId) {
             document.querySelectorAll('.aba-item').forEach(aba => {
@@ -2171,21 +2308,23 @@
             return valido;
         }
 
-        function validarEtapa2() {
-            const partido = document.getElementById('candidatoPartido').value;
-            const numero = document.getElementById('candidatoNumero').value;
-            
-            const valido = partido && numero && numero.length > 0 && 
-                         !document.getElementById('btnEtapa2').disabled;
-            
-            document.getElementById('btnEtapa2').disabled = !valido;
-            
-            if (valido) {
-                estadoSistema.dadosCandidatura.etapa2 = { partido, numero };
-            }
-            
-            return valido;
-        }
+       function validarEtapa2() {
+    const partido = document.getElementById('candidatoPartido').value;
+    const numero = document.getElementById('candidatoNumero').value;
+    
+    const valido = partido && numero && numero.length > 0;
+    
+    document.getElementById('btnEtapa2').disabled = !valido;
+    
+    // Salvar dados da etapa 2
+    if (valido) {
+        estadoSistema.dadosCandidatura.etapa2 = {
+            partido, numero
+        };
+    }
+    
+    return valido;
+}
 
         function avancarParaEtapa2() {
             if (validarEtapa1()) {
@@ -2827,7 +2966,7 @@
                 alert(`🔓 ACESSO CONCEDIDO: TRE ${cidade}`);
                 navegarParaAba('analise');
             } else {
-                alert(`❌ ACESSO NEGADO: Senha incorreta. Padrão esperado: ${nomeBase}${sigla}`);
+                alert(`❌ ACESSO NEGADO: Senha incorreta.`);
             }
         }
 
@@ -3086,9 +3225,9 @@
                 
                 let corIdeologia = "";
                 switch(partido.ideologia) {
-                    case "Direita": corIdeologia = "var(--warning-red)"; break;
+                    case "Direita": corIdeologia = "var(--eletric-blue)"; break;
                     case "Centro": corIdeologia = "var(--gold)"; break;
-                    case "Esquerda": corIdeologia = "var(--electric-blue)"; break;
+                    case "Esquerda": corIdeologia = "var(--warning-red)"; break;
                 }
                 
                 tr.innerHTML = `
