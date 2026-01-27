@@ -11,1679 +11,1154 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-/* ============================================
-   VARIÁVEIS DE CORES CYBERPUNK
-   ============================================ */
-:root {
-    --primary-gradient: linear-gradient(135deg, #00ffcc 0%, #00ccff 50%, #9933ff 100%);
-    --secondary-gradient: linear-gradient(135deg, #ff3366 0%, #ff9933 100%);
-    --dark-bg: #0a0a1a;
-    --darker-bg: #050510;
-    --card-bg: rgba(10, 15, 35, 0.8);
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --neon-blue: #00f3ff;
-    --neon-purple: #bf00ff;
-    --neon-pink: #ff00cc;
-    --neon-green: #00ff9d;
-    --text-primary: #ffffff;
-    --text-secondary: #b8b8d1;
-    --success: #00ff88;
-    --warning: #ffaa00;
-    --danger: #ff5555;
-    --grid-color: rgba(0, 243, 255, 0.1);
-    --hologram-color: rgba(191, 0, 255, 0.15);
-}
-
-/* ============================================
-   RESET E CONFIGURAÇÕES GERAIS
-   ============================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-}
-
-body {
-    background: 
-        radial-gradient(ellipse at 20% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 40%),
-        radial-gradient(ellipse at 80% 80%, rgba(191, 0, 255, 0.1) 0%, transparent 40%),
-        linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
-    color: var(--text-primary);
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Grid holográfico de fundo */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
-        linear-gradient(0deg, var(--grid-color) 1px, transparent 1px);
-    background-size: 50px 50px;
-    pointer-events: none;
-    opacity: 0.3;
-    z-index: 0;
-}
-
-/* Efeito de partículas animadas */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 243, 255, 0.1) 0%, transparent 10%),
-        radial-gradient(circle at 80% 20%, rgba(191, 0, 255, 0.1) 0%, transparent 10%),
-        radial-gradient(circle at 40% 80%, rgba(255, 0, 204, 0.1) 0%, transparent 10%);
-    animation: particleFloat 20s infinite linear;
-    pointer-events: none;
-    z-index: 0;
-}
-
-@keyframes particleFloat {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(100px, 100px) rotate(360deg); }
-}
-
-.container {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 20px;
-    position: relative;
-    z-index: 1;
-}
-
-/* ============================================
-   HEADER NEON COM EFEITO GLITCH
-   ============================================ */
-header {
-    background: rgba(10, 15, 35, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 25px;
-    padding: 25px 40px;
-    margin-bottom: 40px;
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(0, 243, 255, 0.1),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Efeito de glitch no header */
-header::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: var(--primary-gradient);
-    z-index: -1;
-    filter: blur(20px);
-    opacity: 0.3;
-    animation: glitch 5s infinite;
-}
-
-@keyframes glitch {
-    0%, 100% { opacity: 0.3; transform: translate(0, 0); }
-    2% { opacity: 0.4; transform: translate(-2px, 2px); }
-    4% { opacity: 0.3; transform: translate(2px, -2px); }
-    96% { opacity: 0.3; transform: translate(0, 0); }
-    98% { opacity: 0.4; transform: translate(2px, -2px); }
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-}
-
-.logo {
-    width: 100px;
-    height: 100px;
-    background: var(--primary-gradient);
-    border-radius: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: var(--dark-bg);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-        0 0 30px rgba(0, 243, 255, 0.5),
-        inset 0 0 0 2px rgba(255, 255, 255, 0.2);
-    animation: logoPulse 4s infinite;
-}
-
-@keyframes logoPulse {
-    0%, 100% { 
-        box-shadow: 
-            0 0 30px rgba(0, 243, 255, 0.5),
-            inset 0 0 0 2px rgba(255, 255, 255, 0.2);
-    }
-    50% { 
-        box-shadow: 
-            0 0 60px rgba(191, 0, 255, 0.7),
-            inset 0 0 0 2px rgba(255, 255, 255, 0.3);
-    }
-}
-
-.titulo-sistema h1 {
-    font-size: 2.8rem;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
-    position: relative;
-    display: inline-block;
-}
-
-.titulo-sistema h1::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--primary-gradient);
-    border-radius: 3px;
-    opacity: 0.7;
-}
-
-.titulo-sistema p {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    font-weight: 300;
-    letter-spacing: 1px;
-}
-
-.usuario-info {
-    background: rgba(5, 10, 25, 0.7);
-    padding: 20px 30px;
-    border-radius: 20px;
-    border: 1px solid rgba(0, 243, 255, 0.2);
-    position: relative;
-    overflow: hidden;
-    text-align: right;
-    min-width: 250px;
-}
-
-.usuario-info::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--primary-gradient);
-    animation: scanline 2s linear infinite;
-}
-
-@keyframes scanline {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
-}
-
-.usuario-nome {
-    font-size: 1.4rem;
-    font-weight: 700;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 5px;
-}
-
-.usuario-cargo {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 300;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* ============================================
-   ABAS HOLOGRÁFICAS
-   ============================================ */
-.abas-container {
-    display: flex;
-    background: rgba(10, 15, 35, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.4),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    margin-bottom: 40px;
-    position: relative;
-}
-
-.abas-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--primary-gradient);
-    opacity: 0.5;
-}
-
-.abas-lateral {
-    width: 280px;
-    background: linear-gradient(
-        180deg,
-        rgba(5, 10, 25, 0.9) 0%,
-        rgba(10, 15, 35, 0.9) 100%
-    );
-    padding: 40px 0;
-    border-right: 1px solid var(--glass-border);
-}
-
-.aba-item {
-    padding: 22px 35px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    position: relative;
-    border-left: 4px solid transparent;
-    margin: 5px 0;
-}
-
-.aba-item:hover {
-    background: rgba(0, 243, 255, 0.1);
-    color: var(--neon-blue);
-    padding-left: 40px;
-    border-left-color: var(--neon-blue);
-}
-
-.aba-item:hover::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 3px;
-    background: var(--neon-blue);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-}
-
-.aba-item.ativo {
-    background: linear-gradient(
-        90deg,
-        rgba(0, 243, 255, 0.2) 0%,
-        transparent 100%
-    );
-    color: var(--neon-blue);
-    border-left-color: var(--neon-blue);
-    font-weight: 700;
-    text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-}
-
-.aba-item.ativo i {
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 10px currentColor);
-}
-
-.aba-item i {
-    width: 24px;
-    text-align: center;
-    font-size: 1.4rem;
-    transition: all 0.3s ease;
-}
-
-.conteudo-abas {
-    flex: 1;
-    padding: 40px;
-    min-height: 800px;
-    background: rgba(5, 10, 25, 0.5);
-}
-
-.aba-conteudo {
-    display: none;
-    animation: hologramAppear 0.6s ease-out;
-}
-
-.aba-conteudo.ativo {
-    display: block;
-}
-
-@keyframes hologramAppear {
-    from {
-        opacity: 0;
-        transform: translateY(30px) perspective(1000px) rotateX(10deg);
-        filter: blur(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) perspective(1000px) rotateX(0);
-        filter: blur(0);
-    }
-}
-
-/* ============================================
-   CARDS DE DASHBOARD NEON
-   ============================================ */
-.dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 50px;
-}
-
-.card {
-    background: rgba(10, 15, 35, 0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    border: 1px solid var(--glass-border);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.2),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.card:hover {
-    transform: translateY(-15px) scale(1.02);
-    border-color: var(--neon-blue);
-    box-shadow: 
-        0 30px 60px rgba(0, 0, 0, 0.4),
-        0 0 100px rgba(0, 243, 255, 0.2),
-        inset 0 0 0 1px rgba(0, 243, 255, 0.3);
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--primary-gradient);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.card:hover::before {
-    opacity: 1;
-}
-
-.card-titulo {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.card-valor {
-    font-size: 3.5rem;
-    font-weight: 900;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
-    line-height: 1;
-    text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
-}
-
-.card-detalhe {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 300;
-    opacity: 0.8;
-}
-
-/* ============================================
-   FILTROS GLASSMORPHISM
-   ============================================ */
-.filtros-container {
-    background: rgba(10, 15, 35, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 35px;
-    border: 1px solid var(--glass-border);
-    margin-bottom: 40px;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.filtros-titulo {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.filtros-titulo i {
-    color: var(--neon-blue);
-    filter: drop-shadow(0 0 10px currentColor);
-}
-
-.filtros-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-}
-
-.filtro-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filtro-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-}
-
-.filtro-select, .form-select, .form-input {
-    padding: 18px 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 243, 255, 0.3);
-    background: rgba(5, 10, 25, 0.7);
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 400;
-    outline: none;
-}
-
-.filtro-select:focus, .form-select:focus, .form-input:focus {
-    border-color: var(--neon-blue);
-    box-shadow: 
-        0 0 0 3px rgba(0, 243, 255, 0.1),
-        0 0 30px rgba(0, 243, 255, 0.2);
-    background: rgba(5, 10, 25, 0.9);
-}
-
-.filtro-select option, .form-select option {
-    background: var(--dark-bg);
-    color: var(--text-primary);
-    padding: 12px;
-}
-
-/* ============================================
-   TABELA HOLOGRÁFICA
-   ============================================ */
-.tabela-container {
-    background: rgba(10, 15, 35, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-    margin-bottom: 40px;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.tabela-header {
-    padding: 25px 35px;
-    background: linear-gradient(
-        90deg,
-        rgba(0, 243, 255, 0.2) 0%,
-        rgba(191, 0, 255, 0.2) 100%
-    );
-    border-bottom: 1px solid var(--glass-border);
-    position: relative;
-    overflow: hidden;
-}
-
-.tabela-header h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: var(--text-primary);
-}
-
-.tabela-content {
-    overflow-x: auto;
-    max-height: 600px;
-    position: relative;
-}
-
-.tabela-content::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-}
-
-.tabela-content::-webkit-scrollbar-track {
-    background: rgba(5, 10, 25, 0.5);
-    border-radius: 4px;
-}
-
-.tabela-content::-webkit-scrollbar-thumb {
-    background: var(--primary-gradient);
-    border-radius: 4px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 1200px;
-}
-
-thead {
-    background: rgba(5, 10, 25, 0.9);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-th {
-    padding: 22px 20px;
-    text-align: left;
-    color: var(--neon-blue);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-size: 0.85rem;
-    border-bottom: 2px solid rgba(0, 243, 255, 0.3);
-    white-space: nowrap;
-}
-
-td {
-    padding: 22px 20px;
-    border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-    color: var(--text-primary);
-    font-weight: 400;
-}
-
-tbody tr {
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-tbody tr::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--primary-gradient);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-tbody tr:hover {
-    background: rgba(0, 243, 255, 0.05);
-}
-
-tbody tr:hover::before {
-    opacity: 1;
-}
-
-tbody tr:hover td {
-    color: var(--neon-blue);
-}
-
-/* ============================================
-   BADGES DE STATUS
-   ============================================ */
-.status-badge {
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: inline-block;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.status-badge::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.2) 50%,
-        transparent 70%
-    );
-    animation: shine 3s infinite;
-}
-
-@keyframes shine {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-}
-
-.status-analise { 
-    background: linear-gradient(135deg, var(--warning), #ffcc00);
-    color: var(--dark-bg);
-    box-shadow: 0 0 20px rgba(255, 170, 0, 0.4);
-}
-
-.status-aprovado { 
-    background: linear-gradient(135deg, var(--success), #00ffaa);
-    color: var(--dark-bg);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-}
-
-.status-recusado { 
-    background: linear-gradient(135deg, var(--danger), #ff3366);
-    color: white;
-    box-shadow: 0 0 20px rgba(255, 85, 85, 0.4);
-}
-
-/* ============================================
-   BOTÕES NEON
-   ============================================ */
-.btn {
-    padding: 18px 35px;
-    border-radius: 15px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
-    transition: left 0.6s ease;
-}
-
-.btn:hover::before {
-    left: 100%;
-}
-
-.btn-primario {
-    background: var(--primary-gradient);
-    color: var(--dark-bg);
-    box-shadow: 
-        0 15px 35px rgba(0, 243, 255, 0.4),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-
-.btn-primario:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 
-        0 25px 50px rgba(0, 243, 255, 0.6),
-        0 0 100px rgba(0, 243, 255, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.3);
-    filter: brightness(1.2);
-}
-
-.btn-secundario {
-    background: transparent;
-    color: var(--neon-blue);
-    border: 2px solid var(--neon-blue);
-}
-
-.btn-secundario:hover {
-    background: rgba(0, 243, 255, 0.1);
-    transform: translateY(-5px);
-    box-shadow: 
-        0 15px 35px rgba(0, 243, 255, 0.3),
-        inset 0 0 0 1px rgba(0, 243, 255, 0.3);
-}
-
-.btn-terciario {
-    background: var(--secondary-gradient);
-    color: white;
-    box-shadow: 
-        0 15px 35px rgba(255, 51, 102, 0.4),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-
-.btn-terciario:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 
-        0 25px 50px rgba(255, 51, 102, 0.6),
-        0 0 100px rgba(255, 51, 102, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.3);
-}
-
-.btn-pequeno {
-    padding: 12px 24px;
-    font-size: 0.9rem;
-}
-
-/* ============================================
-   MODAIS HOLOGRÁFICAS
-   ============================================ */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(5, 10, 25, 0.95);
-    backdrop-filter: blur(20px);
-    z-index: 10000;
-    align-items: center;
-    justify-content: center;
-    animation: modalFadeIn 0.5s ease;
-}
-
-@keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.modal.ativo {
-    display: flex;
-}
-
-.modal-content {
-    background: linear-gradient(
-        145deg,
-        rgba(10, 15, 35, 0.95) 0%,
-        rgba(5, 10, 25, 0.95) 100%
-    );
-    border-radius: 30px;
-    width: 90%;
-    max-width: 700px;
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-        0 40px 80px rgba(0, 0, 0, 0.6),
-        0 0 200px rgba(0, 243, 255, 0.2),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    animation: modalSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes modalSlideUp {
-    from { 
-        opacity: 0; 
-        transform: translateY(60px) perspective(1000px) rotateX(10deg);
-        filter: blur(20px);
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) perspective(1000px) rotateX(0);
-        filter: blur(0);
-    }
-}
-
-.modal-header {
-    padding: 30px;
-    background: linear-gradient(
-        90deg,
-        rgba(0, 243, 255, 0.2) 0%,
-        rgba(191, 0, 255, 0.2) 100%
-    );
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.modal-header h3 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.modal-body {
-    padding: 35px;
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.modal-footer {
-    padding: 25px 35px;
-    background: rgba(5, 10, 25, 0.8);
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px;
-}
-
-/* ============================================
-   FORMULÁRIOS FUTURISTAS
-   ============================================ */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-.etapa {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 18px;
-    border-radius: 15px;
-    background: rgba(5, 10, 25, 0.5);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 1px solid transparent;
-}
-
-.etapa:hover {
-    border-color: rgba(0, 243, 255, 0.3);
-    background: rgba(0, 243, 255, 0.05);
-}
-
-.etapa.ativo {
-    background: rgba(0, 243, 255, 0.2);
-    border-left: 4px solid var(--neon-blue);
-    border-color: rgba(0, 243, 255, 0.3);
-}
-
-.etapa.concluido {
-    background: rgba(0, 255, 136, 0.1);
-    border-left: 4px solid var(--neon-green);
-    border-color: rgba(0, 255, 136, 0.2);
-}
-
-.etapa-numero {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(5, 10, 25, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: var(--text-secondary);
-    font-size: 1.2rem;
-    border: 2px solid var(--glass-border);
-}
-
-.etapa.ativo .etapa-numero {
-    background: var(--neon-blue);
-    color: var(--dark-bg);
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-}
-
-.etapa.concluido .etapa-numero {
-    background: var(--neon-green);
-    color: var(--dark-bg);
-    border-color: var(--neon-green);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-}
-
-/* ============================================
-   ELEMENTOS ESPECIAIS
-   ============================================ */
-/* Switch moderno */
-.switch-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 70px;
-    height: 34px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(5, 10, 25, 0.8);
-    transition: .4s;
-    border-radius: 34px;
-    border: 2px solid rgba(0, 243, 255, 0.3);
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 2px;
-    bottom: 2px;
-    background: var(--text-secondary);
-    transition: .4s;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-input:checked + .slider {
-    background: var(--primary-gradient);
-    border-color: rgba(0, 243, 255, 0.5);
-}
-
-input:checked + .slider:before {
-    transform: translateX(36px);
-    background: white;
-    box-shadow: 0 0 20px white;
-}
-
-/* Preview de foto */
-.foto-preview-container {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.foto-preview {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--neon-blue);
-    box-shadow: 
-        0 0 30px rgba(0, 243, 255, 0.5),
-        inset 0 0 20px rgba(0, 243, 255, 0.2);
-    animation: photoGlow 3s infinite alternate;
-}
-
-@keyframes photoGlow {
-    0% { box-shadow: 0 0 30px rgba(0, 243, 255, 0.5); }
-    100% { box-shadow: 0 0 50px rgba(191, 0, 255, 0.7); }
-}
-
-.foto-placeholder {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: rgba(5, 10, 25, 0.5);
-    border: 4px dashed var(--neon-blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-align: center;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-}
-
-.foto-placeholder::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        45deg,
-        transparent 40%,
-        rgba(0, 243, 255, 0.1) 50%,
-        transparent 60%
-    );
-    animation: placeholderShine 3s infinite;
-}
-
-@keyframes placeholderShine {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-}
-
-.file-input-wrapper {
-    position: relative;
-    margin-top: 10px;
-}
-
-.file-input-wrapper input[type="file"] {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.file-input-label {
-    display: inline-block;
-    padding: 15px 30px;
-    background: rgba(0, 243, 255, 0.1);
-    border: 2px dashed var(--neon-blue);
-    border-radius: 15px;
-    color: var(--neon-blue);
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: center;
-    width: 100%;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-.file-input-label:hover {
-    background: rgba(0, 243, 255, 0.2);
-    border-color: var(--neon-purple);
-    transform: translateY(-2px);
-}
-
-/* Coligação */
-.coligacao-container {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(5, 10, 25, 0.5);
-    border-radius: 15px;
-    border: 1px solid rgba(0, 243, 255, 0.2);
-}
-
-.coligacao-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 15px;
-    background: rgba(10, 15, 35, 0.8);
-    border-radius: 10px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(0, 243, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.coligacao-item:hover {
-    border-color: var(--neon-blue);
-    background: rgba(0, 243, 255, 0.05);
-}
-
-.coligacao-remove {
-    background: var(--danger);
-    color: white;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.coligacao-remove:hover {
-    background: #ff3366;
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 85, 85, 0.5);
-}
-
-/* Validação de número */
-.numero-validacao {
-    font-size: 0.9rem;
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background: rgba(5, 10, 25, 0.5);
-}
-
-.numero-validacao.valid {
-    color: var(--success);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-}
-
-.numero-validacao.invalid {
-    color: var(--danger);
-    border: 1px solid rgba(255, 85, 85, 0.3);
-}
-
-/* ============================================
-   ANIMAÇÕES ESPECIAIS
-   ============================================ */
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-@keyframes glow {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-}
-
-@keyframes scan {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
-}
-
-/* Elementos flutuantes */
-.floating {
-    animation: float 6s ease-in-out infinite;
-}
-
-/* Efeito de brilho */
-.glow {
-    animation: glow 2s ease-in-out infinite alternate;
-}
-
-/* Linha de scanner */
-.scan-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--primary-gradient);
-    animation: scan 2s linear infinite;
-    opacity: 0.5;
-}
-
-/* ============================================
-   RESPONSIVIDADE
-   ============================================ */
-@media (max-width: 1400px) {
-    .container {
-        padding: 15px;
-    }
-    
-    .dashboard-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .abas-lateral {
-        width: 250px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .abas-container {
-        flex-direction: column;
-    }
-    
-    .abas-lateral {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-        padding: 0;
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
-    }
-    
-    .aba-item {
-        padding: 20px 25px;
-        white-space: nowrap;
-        border-left: none;
-        border-bottom: 4px solid transparent;
-        min-width: 200px;
-    }
-    
-    .aba-item.ativo {
-        border-left: none;
-        border-bottom-color: var(--neon-blue);
-    }
-    
-    .conteudo-abas {
-        padding: 30px;
-    }
-    
-    .dashboard-cards {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        text-align: center;
-        gap: 25px;
-        padding: 25px;
-    }
-    
-    .logo-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .usuario-info {
-        text-align: center;
-        min-width: auto;
-        width: 100%;
-    }
-    
-    .filtros-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .modal-content {
-        width: 95%;
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .modal-footer .btn {
-        width: 100%;
-    }
-    
-    .foto-preview, .foto-placeholder {
-        width: 120px;
-        height: 120px;
-    }
-}
-
-@media (max-width: 480px) {
-    body {
-        padding: 10px;
-    }
-    
-    .container {
-        padding: 10px;
-    }
-    
-    .conteudo-abas {
-        padding: 20px;
-    }
-    
-    .card {
-        padding: 20px;
-    }
-    
-    .card-valor {
-        font-size: 2.5rem;
-    }
-    
-    .btn {
-        padding: 15px 25px;
-        font-size: 0.9rem;
-    }
-    
-    .filtros-container {
-        padding: 25px;
-    }
-    
-    .modal-body {
-        padding: 25px;
-    }
-}
-
-/* ============================================
-   UTILITÁRIOS
-   ============================================ */
-.hidden {
-    display: none !important;
-}
-
-.texto-centro {
-    text-align: center;
-}
-
-.texto-direita {
-    text-align: right;
-}
-
-.mb-20 { margin-bottom: 20px; }
-.mb-30 { margin-bottom: 30px; }
-.mb-40 { margin-bottom: 40px; }
-.mt-20 { margin-top: 20px; }
-.mt-30 { margin-top: 30px; }
-.mt-40 { margin-top: 40px; }
-
-/* Mensagens */
-.mensagem {
-    padding: 20px 25px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border: 1px solid;
-    backdrop-filter: blur(10px);
-    animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.mensagem-sucesso {
-    background: rgba(0, 255, 136, 0.1);
-    border-color: rgba(0, 255, 136, 0.3);
-    color: var(--success);
-    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
-}
-
-.mensagem-erro {
-    background: rgba(255, 85, 85, 0.1);
-    border-color: rgba(255, 85, 85, 0.3);
-    color: var(--danger);
-    box-shadow: 0 10px 30px rgba(255, 85, 85, 0.1);
-}
-
-.mensagem-aviso {
-    background: rgba(255, 170, 0, 0.1);
-    border-color: rgba(255, 170, 0, 0.3);
-    color: var(--warning);
-    box-shadow: 0 10px 30px rgba(255, 170, 0, 0.1);
-}
-
-/* Loading skeleton */
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.05) 25%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.05) 75%
-    );
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 10px;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* Tooltips */
-.tooltip {
-    position: relative;
-    cursor: help;
-}
-
-.tooltip-text {
-    visibility: hidden;
-    width: 300px;
-    background: rgba(10, 15, 35, 0.95);
-    color: var(--text-primary);
-    text-align: left;
-    border-radius: 10px;
-    padding: 15px;
-    position: absolute;
-    z-index: 1000;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: 300;
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 80px rgba(0, 243, 255, 0.1);
-    backdrop-filter: blur(20px);
-}
-
-.tooltip:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(-50%) translateY(-10px);
-}
-
-/* ============================================
-   EFEITOS DE FOCO E DESTAQUE
-   ============================================ */
-:focus {
-    outline: 2px solid var(--neon-blue);
-    outline-offset: 2px;
-}
-
-::selection {
-    background: var(--neon-blue);
-    color: var(--dark-bg);
-}
-
-/* Scrollbar personalizada */
-::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(5, 10, 25, 0.5);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-gradient);
-    border-radius: 10px;
-    border: 3px solid rgba(5, 10, 25, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--secondary-gradient);
-}
-
-/* ============================================
-   ANIMAÇÃO DE ENTRADA
-   ============================================ */
-@keyframes pageLoad {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.container {
-    animation: pageLoad 1s ease-out;
-}
-
-/* Efeito de partículas */
-.particle {
-    position: fixed;
-    width: 2px;
-    height: 2px;
-    background: var(--neon-blue);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    animation: particleMove 20s linear infinite;
-}
-
-@keyframes particleMove {
-    0% {
-        transform: translate(0, 0);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--tx, 100px), var(--ty, 100px));
-        opacity: 0;
-    }
-}
-
-/* ============================================
-   EFEITO DE CONEXÃO DE DADOS
-   ============================================ */
-.data-connection {
-    position: relative;
-}
-
-.data-connection::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(0, 243, 255, 0.1) 50%,
-        transparent 100%
-    );
-    animation: dataFlow 3s infinite;
-    pointer-events: none;
-}
-
-@keyframes dataFlow {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-        
-        .foto-preview-container {
-            margin-top: 10px;
-            text-align: center;
+        /* ============================================
+           VARIÁVEIS DE CORES CYBERPUNK
+           ============================================ */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00ffcc 0%, #00ccff 50%, #9933ff 100%);
+            --secondary-gradient: linear-gradient(135deg, #ff3366 0%, #ff9933 100%);
+            --dark-bg: #0a0a1a;
+            --darker-bg: #050510;
+            --card-bg: rgba(10, 15, 35, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff00cc;
+            --neon-green: #00ff9d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d1;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff5555;
+            --grid-color: rgba(0, 243, 255, 0.1);
+            --hologram-color: rgba(191, 0, 255, 0.15);
         }
-        
-        .foto-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--electric-blue);
-            box-shadow: 0 0 20px rgba(0, 180, 216, 0.3);
+
+        /* ============================================
+           RESET E CONFIGURAÇÕES GERAIS
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
         }
-        
-        .foto-placeholder {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(10, 25, 47, 0.5);
-            border: 3px dashed var(--electric-blue);
+
+        body {
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 80%, rgba(191, 0, 255, 0.1) 0%, transparent 40%),
+                linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Grid holográfico de fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(0deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        /* Efeito de partículas animadas */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 243, 255, 0.1) 0%, transparent 10%),
+                radial-gradient(circle at 80% 20%, rgba(191, 0, 255, 0.1) 0%, transparent 10%),
+                radial-gradient(circle at 40% 80%, rgba(255, 0, 204, 0.1) 0%, transparent 10%);
+            animation: particleFloat 20s infinite linear;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           HEADER NEON COM EFEITO GLITCH
+           ============================================ */
+        header {
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 25px 40px;
+            margin-bottom: 40px;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(0, 243, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Efeito de glitch no header */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.3;
+            animation: glitch 5s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { opacity: 0.3; transform: translate(0, 0); }
+            2% { opacity: 0.4; transform: translate(-2px, 2px); }
+            4% { opacity: 0.3; transform: translate(2px, -2px); }
+            96% { opacity: 0.3; transform: translate(0, 0); }
+            98% { opacity: 0.4; transform: translate(2px, -2px); }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-gradient);
+            border-radius: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--silver);
-            font-size: 14px;
+            font-size: 48px;
+            color: var(--dark-bg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 30px rgba(0, 243, 255, 0.5),
+                inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+            animation: logoPulse 4s infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(0, 243, 255, 0.5),
+                    inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 60px rgba(191, 0, 255, 0.7),
+                    inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .titulo-sistema h1 {
+            font-size: 2.8rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+
+        .titulo-sistema h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 3px;
+            opacity: 0.7;
+        }
+
+        .titulo-sistema p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .usuario-info {
+            background: rgba(5, 10, 25, 0.7);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: right;
+            min-width: 250px;
+        }
+
+        .usuario-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-gradient);
+            animation: scanline 2s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .usuario-nome {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .usuario-cargo {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ============================================
+           ABAS HOLOGRÁFICAS
+           ============================================ */
+        .abas-container {
+            display: flex;
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .abas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--primary-gradient);
+            opacity: 0.5;
+        }
+
+        .abas-lateral {
+            width: 280px;
+            background: linear-gradient(
+                180deg,
+                rgba(5, 10, 25, 0.9) 0%,
+                rgba(10, 15, 35, 0.9) 100%
+            );
+            padding: 40px 0;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .aba-item {
+            padding: 22px 35px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            position: relative;
+            border-left: 4px solid transparent;
+            margin: 5px 0;
+        }
+
+        .aba-item:hover {
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--neon-blue);
+            padding-left: 40px;
+            border-left-color: var(--neon-blue);
+        }
+
+        .aba-item:hover::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--neon-blue);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .aba-item.ativo {
+            background: linear-gradient(
+                90deg,
+                rgba(0, 243, 255, 0.2) 0%,
+                transparent 100%
+            );
+            color: var(--neon-blue);
+            border-left-color: var(--neon-blue);
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+
+        .aba-item.ativo i {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .aba-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+
+        .conteudo-abas {
+            flex: 1;
+            padding: 40px;
+            min-height: 800px;
+            background: rgba(5, 10, 25, 0.5);
+        }
+
+        .aba-conteudo {
+            display: none;
+            animation: hologramAppear 0.6s ease-out;
+        }
+
+        .aba-conteudo.ativo {
+            display: block;
+        }
+
+        @keyframes hologramAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) perspective(1000px) rotateX(10deg);
+                filter: blur(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) perspective(1000px) rotateX(0);
+                filter: blur(0);
+            }
+        }
+
+        /* ============================================
+           CARDS DE DASHBOARD NEON
+           ============================================ */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.2),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: var(--neon-blue);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                0 0 100px rgba(0, 243, 255, 0.2),
+                inset 0 0 0 1px rgba(0, 243, 255, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-titulo {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .card-valor {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+        }
+
+        .card-detalhe {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        /* ============================================
+           FILTROS GLASSMORPHISM
+           ============================================ */
+        .filtros-container {
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 35px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .filtros-titulo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filtros-titulo i {
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .filtro-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filtro-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .filtro-select, .form-select, .form-input {
+            padding: 18px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            background: rgba(5, 10, 25, 0.7);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+            outline: none;
+        }
+
+        .filtro-select:focus, .form-select:focus, .form-input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 
+                0 0 0 3px rgba(0, 243, 255, 0.1),
+                0 0 30px rgba(0, 243, 255, 0.2);
+            background: rgba(5, 10, 25, 0.9);
+        }
+
+        .filtro-select option, .form-select option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            padding: 12px;
+        }
+
+        /* ============================================
+           TABELA HOLOGRÁFICA
+           ============================================ */
+        .tabela-container {
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .tabela-header {
+            padding: 25px 35px;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 243, 255, 0.2) 0%,
+                rgba(191, 0, 255, 0.2) 100%
+            );
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tabela-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-primary);
+        }
+
+        .tabela-content {
+            overflow-x: auto;
+            max-height: 600px;
+            position: relative;
+        }
+
+        .tabela-content::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .tabela-content::-webkit-scrollbar-track {
+            background: rgba(5, 10, 25, 0.5);
+            border-radius: 4px;
+        }
+
+        .tabela-content::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        thead {
+            background: rgba(5, 10, 25, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 22px 20px;
+            text-align: left;
+            color: var(--neon-blue);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 22px 20px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        tbody tr::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        tbody tr:hover::before {
+            opacity: 1;
+        }
+
+        tbody tr:hover td {
+            color: var(--neon-blue);
+        }
+
+        /* ============================================
+           BADGES DE STATUS
+           ============================================ */
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.2) 50%,
+                transparent 70%
+            );
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .status-analise { 
+            background: linear-gradient(135deg, var(--warning), #ffcc00);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.4);
+        }
+
+        .status-aprovado { 
+            background: linear-gradient(135deg, var(--success), #00ffaa);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .status-recusado { 
+            background: linear-gradient(135deg, var(--danger), #ff3366);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 85, 85, 0.4);
+        }
+
+        /* ============================================
+           BOTÕES NEON
+           ============================================ */
+        .btn {
+            padding: 18px 35px;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primario {
+            background: var(--primary-gradient);
+            color: var(--dark-bg);
+            box-shadow: 
+                0 15px 35px rgba(0, 243, 255, 0.4),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primario:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 25px 50px rgba(0, 243, 255, 0.6),
+                0 0 100px rgba(0, 243, 255, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+            filter: brightness(1.2);
+        }
+
+        .btn-secundario {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+        }
+
+        .btn-secundario:hover {
+            background: rgba(0, 243, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 15px 35px rgba(0, 243, 255, 0.3),
+                inset 0 0 0 1px rgba(0, 243, 255, 0.3);
+        }
+
+        .btn-terciario {
+            background: var(--secondary-gradient);
+            color: white;
+            box-shadow: 
+                0 15px 35px rgba(255, 51, 102, 0.4),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-terciario:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 25px 50px rgba(255, 51, 102, 0.6),
+                0 0 100px rgba(255, 51, 102, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-pequeno {
+            padding: 12px 24px;
+            font-size: 0.9rem;
+        }
+
+        /* ============================================
+           MODAIS HOLOGRÁFICAS
+           ============================================ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 10, 25, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.5s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.ativo {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(
+                145deg,
+                rgba(10, 15, 35, 0.95) 0%,
+                rgba(5, 10, 25, 0.95) 100%
+            );
+            border-radius: 30px;
+            width: 90%;
+            max-width: 700px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 40px 80px rgba(0, 0, 0, 0.6),
+                0 0 200px rgba(0, 243, 255, 0.2),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            animation: modalSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(60px) perspective(1000px) rotateX(10deg);
+                filter: blur(20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) perspective(1000px) rotateX(0);
+                filter: blur(0);
+            }
+        }
+
+        .modal-header {
+            padding: 30px;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 243, 255, 0.2) 0%,
+                rgba(191, 0, 255, 0.2) 100%
+            );
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-body {
+            padding: 35px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 25px 35px;
+            background: rgba(5, 10, 25, 0.8);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+        }
+
+        /* ============================================
+           FORMULÁRIOS FUTURISTAS
+           ============================================ */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .etapa {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px;
+            border-radius: 15px;
+            background: rgba(5, 10, 25, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .etapa:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .etapa.ativo {
+            background: rgba(0, 243, 255, 0.2);
+            border-left: 4px solid var(--neon-blue);
+            border-color: rgba(0, 243, 255, 0.3);
+        }
+
+        .etapa.concluido {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid var(--neon-green);
+            border-color: rgba(0, 255, 136, 0.2);
+        }
+
+        .etapa-numero {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(5, 10, 25, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            border: 2px solid var(--glass-border);
+        }
+
+        .etapa.ativo .etapa-numero {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+
+        .etapa.concluido .etapa-numero {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* ============================================
+           ELEMENTOS ESPECIAIS
+           ============================================ */
+        /* Switch moderno */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 10, 25, 0.8);
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid rgba(0, 243, 255, 0.3);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background: var(--text-secondary);
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        input:checked + .slider {
+            background: var(--primary-gradient);
+            border-color: rgba(0, 243, 255, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(36px);
+            background: white;
+            box-shadow: 0 0 20px white;
+        }
+
+        /* Preview de foto */
+        .foto-preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .foto-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--neon-blue);
+            box-shadow: 
+                0 0 30px rgba(0, 243, 255, 0.5),
+                inset 0 0 20px rgba(0, 243, 255, 0.2);
+            animation: photoGlow 3s infinite alternate;
+        }
+
+        @keyframes photoGlow {
+            0% { box-shadow: 0 0 30px rgba(0, 243, 255, 0.5); }
+            100% { box-shadow: 0 0 50px rgba(191, 0, 255, 0.7); }
+        }
+
+        .foto-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(5, 10, 25, 0.5);
+            border: 4px dashed var(--neon-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             text-align: center;
             margin: 0 auto;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .foto-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 40%,
+                rgba(0, 243, 255, 0.1) 50%,
+                transparent 60%
+            );
+            animation: placeholderShine 3s infinite;
+        }
+
+        @keyframes placeholderShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
         .file-input-wrapper {
             position: relative;
             margin-top: 10px;
         }
-        
+
         .file-input-wrapper input[type="file"] {
             position: absolute;
             width: 100%;
             height: 100%;
             opacity: 0;
             cursor: pointer;
+            z-index: 2;
         }
-        
+
         .file-input-label {
             display: inline-block;
-            padding: 12px 24px;
-            background: rgba(0, 180, 216, 0.1);
-            border: 2px dashed var(--electric-blue);
-            border-radius: 12px;
-            color: var(--electric-blue);
+            padding: 15px 30px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px dashed var(--neon-blue);
+            border-radius: 15px;
+            color: var(--neon-blue);
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
             width: 100%;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        
+
         .file-input-label:hover {
-            background: rgba(0, 180, 216, 0.2);
-            border-color: var(--cyber-green);
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-purple);
+            transform: translateY(-2px);
         }
-        
+
+        /* Coligação */
         .coligacao-container {
             margin-top: 20px;
             padding: 20px;
-            background: rgba(10, 25, 47, 0.3);
-            border-radius: 12px;
-            border: 1px solid rgba(0, 180, 216, 0.2);
+            background: rgba(5, 10, 25, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
         }
-        
+
         .coligacao-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(10, 15, 35, 0.8);
+            border-radius: 10px;
             margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(17, 34, 64, 0.5);
-            border-radius: 8px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            transition: all 0.3s ease;
         }
-        
+
+        .coligacao-item:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
         .coligacao-remove {
-            background: var(--warning-red);
+            background: var(--danger);
             color: white;
             border: none;
             width: 30px;
@@ -1693,85 +1168,442 @@ input:checked + .slider:before {
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
         }
-        
+
+        .coligacao-remove:hover {
+            background: #ff3366;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 85, 85, 0.5);
+        }
+
+        /* Validação de número */
         .numero-validacao {
-            font-size: 12px;
-            margin-top: 5px;
+            font-size: 0.9rem;
+            margin-top: 8px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(5, 10, 25, 0.5);
         }
-        
+
         .numero-validacao.valid {
-            color: var(--cyber-green);
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
         }
-        
+
         .numero-validacao.invalid {
-            color: var(--warning-red);
+            color: var(--danger);
+            border: 1px solid rgba(255, 85, 85, 0.3);
         }
-        
-        .switch-container {
+
+        /* ============================================
+           ANIMAÇÕES ESPECIAIS
+           ============================================ */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* Elementos flutuantes */
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Efeito de brilho */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        /* Linha de scanner */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            animation: scan 2s linear infinite;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           RESPONSIVIDADE
+           ============================================ */
+        @media (max-width: 1400px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .abas-lateral {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .abas-container {
+                flex-direction: column;
+            }
+            
+            .abas-lateral {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+                padding: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+            }
+            
+            .aba-item {
+                padding: 20px 25px;
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+                min-width: 200px;
+            }
+            
+            .aba-item.ativo {
+                border-left: none;
+                border-bottom-color: var(--neon-blue);
+            }
+            
+            .conteudo-abas {
+                padding: 30px;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 25px;
+                padding: 25px;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .usuario-info {
+                text-align: center;
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+            }
+            
+            .foto-preview, .foto-placeholder {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .conteudo-abas {
+                padding: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .card-valor {
+                font-size: 2.5rem;
+            }
+            
+            .btn {
+                padding: 15px 25px;
+                font-size: 0.9rem;
+            }
+            
+            .filtros-container {
+                padding: 25px;
+            }
+            
+            .modal-body {
+                padding: 25px;
+            }
+        }
+
+        /* ============================================
+           UTILITÁRIOS
+           ============================================ */
+        .hidden {
+            display: none !important;
+        }
+
+        .texto-centro {
+            text-align: center;
+        }
+
+        .texto-direita {
+            text-align: right;
+        }
+
+        .mb-20 { margin-bottom: 20px; }
+        .mb-30 { margin-bottom: 30px; }
+        .mb-40 { margin-bottom: 40px; }
+        .mt-20 { margin-top: 20px; }
+        .mt-30 { margin-top: 30px; }
+        .mt-40 { margin-top: 40px; }
+
+        /* Mensagens */
+        .mensagem {
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 15px;
+            border: 1px solid;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.5s ease;
         }
-        
-        .switch {
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mensagem-sucesso {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+            color: var(--success);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+        }
+
+        .mensagem-erro {
+            background: rgba(255, 85, 85, 0.1);
+            border-color: rgba(255, 85, 85, 0.3);
+            color: var(--danger);
+            box-shadow: 0 10px 30px rgba(255, 85, 85, 0.1);
+        }
+
+        .mensagem-aviso {
+            background: rgba(255, 170, 0, 0.1);
+            border-color: rgba(255, 170, 0, 0.3);
+            color: var(--warning);
+            box-shadow: 0 10px 30px rgba(255, 170, 0, 0.1);
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 75%
+            );
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 10px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Tooltips */
+        .tooltip {
             position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
+            cursor: help;
         }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 300px;
+            background: rgba(10, 15, 35, 0.95);
+            color: var(--text-primary);
+            text-align: left;
+            border-radius: 10px;
+            padding: 15px;
             position: absolute;
-            cursor: pointer;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 300;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(0, 243, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        /* ============================================
+           EFEITOS DE FOCO E DESTAQUE
+           ============================================ */
+        :focus {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 2px;
+        }
+
+        ::selection {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(5, 10, 25, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            border: 3px solid rgba(5, 10, 25, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
+        }
+
+        /* ============================================
+           ANIMAÇÃO DE ENTRADA
+           ============================================ */
+        @keyframes pageLoad {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .container {
+            animation: pageLoad 1s ease-out;
+        }
+
+        /* Efeito de partículas */
+        .particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: particleMove 20s linear infinite;
+        }
+
+        @keyframes particleMove {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx, 100px), var(--ty, 100px));
+                opacity: 0;
+            }
+        }
+
+        /* ============================================
+           EFEITO DE CONEXÃO DE DADOS
+           ============================================ */
+        .data-connection {
+            position: relative;
+        }
+
+        .data-connection::after {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .4s;
-            border-radius: 34px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(0, 243, 255, 0.1) 50%,
+                transparent 100%
+            );
+            animation: dataFlow 3s infinite;
+            pointer-events: none;
         }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--silver);
-            transition: .4s;
-            border-radius: 50%;
+
+        @keyframes dataFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
-        
-        input:checked + .slider {
-            background: linear-gradient(90deg, var(--electric-blue), var(--cyber-green));
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(30px);
-            background-color: white;
-        }
-        
-        .exclusao-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 0, 85, 0.05);
-            border: 1px solid rgba(255, 0, 85, 0.2);
-            border-radius: 12px;
-        }
-        
+
         .foto-candidato-tabela {
             width: 40px;
             height: 40px;
@@ -1780,12 +1612,25 @@ input:checked + .slider:before {
             margin-right: 10px;
             vertical-align: middle;
         }
-        
-        @media (max-width: 768px) {
-            .foto-preview, .foto-placeholder {
-                width: 80px;
-                height: 80px;
-            }
+
+        .login-opcao {
+            padding: 20px;
+            background: rgba(5, 10, 25, 0.5);
+            border-radius: 15px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .login-opcao.ativo {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .login-opcao:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05);
         }
     </style>
 </head>
@@ -2503,13 +2348,13 @@ input:checked + .slider:before {
     <script>
         // Configuração Firebase
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            databaseURL: "https://SEU_PROJETO.firebaseio.com",
-            projectId: "SEU_PROJETO",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SEU_APP_ID"
+            apiKey: "AIzaSyAwFLV5X9ICB3mvU4WU1ihxGUeG9UsrbtQ",
+            authDomain: "candidatura-cde.firebaseapp.com",
+            databaseURL: "https://candidatura-cde-default-rtdb.firebaseio.com",
+            projectId: "candidatura-cde",
+            storageBucket: "candidatura-cde.firebasestorage.app",
+            messagingSenderId: "958958180950",
+            appId: "1:958958180950:web:51427276d0a83978fdb9f7"
         };
 
         // Inicializar Firebase
@@ -2518,7 +2363,7 @@ input:checked + .slider:before {
         const storage = firebase.storage();
         const auth = firebase.auth();
 
-        // Dados do Sistema (mantendo os mesmos)
+        // Dados do Sistema
         const DADOS_SISTEMA = {
             estados: [
                 { nome: "BROOKHAVEN", cidades: ["Cidade Eleitoral", "Liberty City"] },
@@ -2645,20 +2490,8 @@ input:checked + .slider:before {
 
         // Funções Firebase
         function inicializarFirebase() {
-            // Configuração personalizada do Firebase
-            const config = {
-                apiKey: "AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ012345678",
-                authDomain: "tse-brookasil.firebaseapp.com",
-                databaseURL: "https://tse-brookasil-default-rtdb.firebaseio.com",
-                projectId: "tse-brookasil",
-                storageBucket: "tse-brookasil.appspot.com",
-                messagingSenderId: "123456789012",
-                appId: "1:123456789012:web:abcdef1234567890abcdef"
-            };
-            
-            // Inicializar apenas se não estiver inicializado
             if (!firebase.apps.length) {
-                firebase.initializeApp(config);
+                firebase.initializeApp(firebaseConfig);
             }
         }
 
@@ -2668,7 +2501,6 @@ input:checked + .slider:before {
                 const data = snapshot.val();
                 
                 if (data) {
-                    // Converter objeto para array
                     const candidaturasArray = Object.keys(data).map(key => ({
                         id: key,
                         ...data[key]
@@ -2678,7 +2510,6 @@ input:checked + .slider:before {
                     console.log(`✅ ${candidaturasArray.length} candidaturas carregadas do Firebase`);
                 }
                 
-                // Carregar configuração do sistema
                 const configSnapshot = await database.ref('config').once('value');
                 const configData = configSnapshot.val();
                 
@@ -2699,14 +2530,11 @@ input:checked + .slider:before {
 
         async function salvarCandidaturaFirebase(candidatura) {
             try {
-                // Gerar ID único
                 const id = Date.now() + Math.floor(Math.random() * 1000);
                 candidatura.id = id.toString();
                 
-                // Salvar no Firebase
                 await database.ref(`candidaturas/${candidatura.id}`).set(candidatura);
                 
-                // Atualizar estado local
                 estadoSistema.candidaturas.push(candidatura);
                 
                 return candidatura.id;
@@ -2721,7 +2549,6 @@ input:checked + .slider:before {
             try {
                 await database.ref(`candidaturas/${id}`).update(dados);
                 
-                // Atualizar estado local
                 const index = estadoSistema.candidaturas.findIndex(c => c.id === id);
                 if (index !== -1) {
                     estadoSistema.candidaturas[index] = { ...estadoSistema.candidaturas[index], ...dados };
@@ -2735,7 +2562,6 @@ input:checked + .slider:before {
 
         async function excluirCandidaturaFirebase(id) {
             try {
-                // Buscar candidatura para deletar foto do storage
                 const candidatura = estadoSistema.candidaturas.find(c => c.id === id);
                 if (candidatura && candidatura.fotoUrl) {
                     try {
@@ -2746,10 +2572,8 @@ input:checked + .slider:before {
                     }
                 }
                 
-                // Deletar do Realtime Database
                 await database.ref(`candidaturas/${id}`).remove();
                 
-                // Atualizar estado local
                 estadoSistema.candidaturas = estadoSistema.candidaturas.filter(c => c.id !== id);
                 
                 return true;
@@ -2767,7 +2591,6 @@ input:checked + .slider:before {
                 
                 uploadTask.on('state_changed',
                     (snapshot) => {
-                        // Progresso do upload
                         const progresso = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                         console.log(`Upload: ${progresso}% concluído`);
                     },
@@ -2801,660 +2624,6 @@ input:checked + .slider:before {
             console.log("🔒 Versão: 3.0.0 - Sistema Anti-Burla");
             console.log("🌐 Firebase: Conectado");
         }
-
-        // Adicione estas funções no seu código JavaScript:
-
-// ============================================
-// SISTEMA DE CONTROLE DE ELEIÇÃO CORRIGIDO
-// ============================================
-
-// Referência para a configuração global
-let configEleicaoRef = null;
-
-// Inicializar sistema de eleição
-function inicializarSistemaEleicao() {
-    console.log("🔧 Inicializando sistema de eleição...");
-    
-    // Referência para configuração global
-    configEleicaoRef = database.ref('config/sistema_eleicao');
-    
-    // Ouvir mudanças em tempo real
-    configEleicaoRef.on('value', (snapshot) => {
-        const config = snapshot.val();
-        if (config) {
-            console.log("📡 Configuração de eleição recebida:", config);
-            
-            estadoSistema.eleicaoAberta = config.eleicaoAberta || false;
-            estadoSistema.tipoEleicaoAtual = config.tipoEleicao || null;
-            
-            // Atualizar UI imediatamente
-            atualizarStatusEleicaoUI();
-            
-            // Se estiver na aba de gerenciamento, atualizar controles
-            if (estadoSistema.tipoUsuario === 'tse' && 
-                document.getElementById('gerenciamento').classList.contains('ativo')) {
-                atualizarControlesEleicao();
-            }
-            
-            // Verificar se precisa notificar sobre mudança
-            if (estadoSistema.eleicaoAberta && !config.lastNotification) {
-                mostrarNotificacaoSistema();
-            }
-        }
-    }, (error) => {
-        console.error("❌ Erro ao escutar configuração:", error);
-        mostrarMensagem("Erro de conexão com servidor", "erro");
-    });
-    
-    // Carregar configuração inicial
-    carregarConfiguracaoEleicao();
-}
-
-// Carregar configuração atual
-async function carregarConfiguracaoEleicao() {
-    try {
-        const snapshot = await configEleicaoRef.once('value');
-        const config = snapshot.val();
-        
-        if (!config) {
-            // Configuração inicial padrão
-            const configInicial = {
-                eleicaoAberta: false,
-                tipoEleicao: null,
-                dataCriacao: new Date().toISOString(),
-                criadoPor: "Sistema",
-                ultimaAtualizacao: new Date().toISOString(),
-                versao: "3.0.0"
-            };
-            
-            await configEleicaoRef.set(configInicial);
-            estadoSistema.eleicaoAberta = false;
-            estadoSistema.tipoEleicaoAtual = null;
-        } else {
-            estadoSistema.eleicaoAberta = config.eleicaoAberta || false;
-            estadoSistema.tipoEleicaoAtual = config.tipoEleicao || null;
-        }
-        
-        atualizarStatusEleicaoUI();
-        
-    } catch (error) {
-        console.error("❌ Erro ao carregar configuração:", error);
-    }
-}
-
-// Função CORRIGIDA para alternar status da eleição
-async function alternarStatusEleicao() {
-    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
-        mostrarMensagem("❌ Apenas o TSE pode alterar o status do sistema", "erro");
-        return;
-    }
-    
-    const novoStatus = !estadoSistema.eleicaoAberta;
-    const btn = document.getElementById('btnAlternarEleicao');
-    const originalText = btn.innerHTML;
-    
-    try {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-        btn.disabled = true;
-        
-        // Atualizar no Firebase
-        await configEleicaoRef.update({
-            eleicaoAberta: novoStatus,
-            ultimaAtualizacao: new Date().toISOString(),
-            atualizadoPor: estadoSistema.usuarioInfo.nome,
-            ultimaAlteracao: {
-                tipo: 'status',
-                valor: novoStatus ? 'ATIVADO' : 'DESATIVADO',
-                data: new Date().toISOString(),
-                usuario: estadoSistema.usuarioInfo.nome
-            }
-        });
-        
-        // O listener on('value') irá atualizar automaticamente
-        console.log(`✅ Sistema ${novoStatus ? 'ATIVADO' : 'DESATIVADO'} com sucesso!`);
-        
-        // Forçar atualização imediata
-        estadoSistema.eleicaoAberta = novoStatus;
-        atualizarStatusEleicaoUI();
-        
-        // Mostrar notificação
-        mostrarMensagem(
-            novoStatus ? 
-            "🎉 SISTEMA ATIVADO - Candidaturas liberadas!" : 
-            "⏸️ SISTEMA DESATIVADO - Candidaturas bloqueadas",
-            novoStatus ? "sucesso" : "aviso"
-        );
-        
-        // Se ativou sem tipo definido, alertar
-        if (novoStatus && !estadoSistema.tipoEleicaoAtual) {
-            mostrarMensagem("⚠️ ATENÇÃO: Tipo de eleição não definido", "aviso");
-        }
-        
-    } catch (error) {
-        console.error("❌ Erro ao alternar status:", error);
-        mostrarMensagem("Erro ao atualizar sistema. Tente novamente.", "erro");
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
-// Função CORRIGIDA para alterar tipo de eleição
-async function alterarTipoEleicao(novoTipo) {
-    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
-        mostrarMensagem("❌ Apenas o TSE pode alterar o tipo de eleição", "erro");
-        return;
-    }
-    
-    try {
-        // Atualizar no Firebase
-        await configEleicaoRef.update({
-            tipoEleicao: novoTipo,
-            ultimaAtualizacao: new Date().toISOString(),
-            atualizadoPor: estadoSistema.usuarioInfo.nome,
-            ultimaAlteracao: {
-                tipo: 'tipo_eleicao',
-                valor: novoTipo,
-                data: new Date().toISOString(),
-                usuario: estadoSistema.usuarioInfo.nome
-            }
-        });
-        
-        // O listener irá atualizar automaticamente
-        console.log(`✅ Tipo de eleição alterado para: ${novoTipo}`);
-        
-        // Mostrar notificação
-        mostrarMensagem(
-            `✅ Tipo de eleição definido: ${novoTipo === 'municipal' ? 'Municipal' : 'Federal'}`,
-            "sucesso"
-        );
-        
-        // Se sistema estava ativo, notificar sobre a mudança
-        if (estadoSistema.eleicaoAberta) {
-            setTimeout(() => {
-                mostrarMensagem(
-                    `ℹ️ Sistema atualizado para: ${novoTipo === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}`,
-                    "aviso"
-                );
-            }, 1000);
-        }
-        
-    } catch (error) {
-        console.error("❌ Erro ao alterar tipo de eleição:", error);
-        mostrarMensagem("Erro ao atualizar tipo de eleição", "erro");
-    }
-}
-
-// Atualizar UI do status da eleição
-function atualizarStatusEleicaoUI() {
-    // Atualizar cabeçalho do sistema
-    document.getElementById('usuarioCargo').textContent = 
-        estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
-    
-    // Atualizar na aba de gerenciamento (se visível)
-    const statusEleicaoEl = document.getElementById('statusEleicao');
-    const btnAlternarEleicaoEl = document.getElementById('btnAlternarEleicao');
-    const tipoEleicaoEl = document.getElementById('tipoEleicao');
-    const selectTipoEleicaoEl = document.getElementById('selectTipoEleicao');
-    
-    if (statusEleicaoEl) {
-        statusEleicaoEl.textContent = 
-            estadoSistema.eleicaoAberta ? "SISTEMA ONLINE" : "SISTEMA OFFLINE";
-        statusEleicaoEl.style.color = estadoSistema.eleicaoAberta ? "#00ff88" : "#ff5555";
-    }
-    
-    if (btnAlternarEleicaoEl) {
-        btnAlternarEleicaoEl.innerHTML = estadoSistema.eleicaoAberta ? 
-            '<i class="fas fa-power-off"></i> Desativar Sistema' : 
-            '<i class="fas fa-power-off"></i> Ativar Sistema';
-        btnAlternarEleicaoEl.style.background = estadoSistema.eleicaoAberta ? 
-            'linear-gradient(135deg, #ff5555, #ff3366)' : 
-            'linear-gradient(135deg, #00ff88, #00cc66)';
-    }
-    
-    if (tipoEleicaoEl) {
-        tipoEleicaoEl.textContent = estadoSistema.tipoEleicaoAtual ? 
-            estadoSistema.tipoEleicaoAtual.toUpperCase() : "NÃO CONFIGURADO";
-    }
-    
-    if (selectTipoEleicaoEl) {
-        selectTipoEleicaoEl.value = estadoSistema.tipoEleicaoAtual || "";
-    }
-    
-    // Atualizar todos os lugares que mostram status
-    atualizarIndicadoresStatus();
-}
-
-// Atualizar controles da eleição
-function atualizarControlesEleicao() {
-    // Garantir que os controles estão atualizados
-    atualizarStatusEleicaoUI();
-    
-    // Habilitar/desabilitar controles baseado no status
-    const selectTipo = document.getElementById('selectTipoEleicao');
-    if (selectTipo) {
-        selectTipo.disabled = false;
-    }
-}
-
-// Atualizar indicadores em todas as partes do sistema
-function atualizarIndicadoresStatus() {
-    // Atualizar status na tabela de candidaturas
-    const indicadores = document.querySelectorAll('.status-indicador');
-    indicadores.forEach(el => {
-        el.textContent = estadoSistema.eleicaoAberta ? "🟢 ONLINE" : "🔴 OFFLINE";
-        el.style.color = estadoSistema.eleicaoAberta ? "#00ff88" : "#ff5555";
-    });
-}
-
-// Mostrar notificação de sistema
-function mostrarNotificacaoSistema() {
-    if (estadoSistema.eleicaoAberta) {
-        const notificacao = document.createElement('div');
-        notificacao.className = 'notificacao-sistema';
-        notificacao.innerHTML = `
-            <div class="notificacao-conteudo">
-                <i class="fas fa-bullhorn"></i>
-                <div>
-                    <strong>🎉 SISTEMA ELETORAL ATIVADO!</strong>
-                    <p>Candidaturas agora estão abertas para: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}</p>
-                </div>
-                <button class="notificacao-fechar">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(notificacao);
-        
-        // Fechar notificação
-        notificacao.querySelector('.notificacao-fechar').addEventListener('click', () => {
-            notificacao.remove();
-        });
-        
-        // Remover automaticamente após 10 segundos
-        setTimeout(() => notificacao.remove(), 10000);
-    }
-}
-
-// Validar se candidatura pode ser enviada
-function validarCandidaturaPodeSerEnviada() {
-    if (!estadoSistema.eleicaoAberta) {
-        mostrarMensagem("❌ SISTEMA FECHADO: As candidaturas não estão sendo aceitas no momento.", "erro");
-        return false;
-    }
-    
-    if (!estadoSistema.tipoEleicaoAtual) {
-        mostrarMensagem("⚠️ Tipo de eleição não definido pelo TSE", "aviso");
-        return false;
-    }
-    
-    return true;
-}
-
-// ============================================
-// ESTILOS PARA O SISTEMA DE NOTIFICAÇÃO
-// ============================================
-const estilosNotificacao = document.createElement('style');
-estilosNotificacao.textContent = `
-.notificacao-sistema {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
-    background: linear-gradient(135deg, rgba(10, 15, 35, 0.95), rgba(5, 10, 25, 0.95));
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 15px;
-    padding: 20px;
-    min-width: 350px;
-    max-width: 400px;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 100px rgba(0, 255, 136, 0.2);
-    animation: slideInRight 0.5s ease;
-    backdrop-filter: blur(10px);
-}
-
-.notificacao-conteudo {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-.notificacao-conteudo i {
-    color: #00ff88;
-    font-size: 24px;
-    margin-top: 2px;
-}
-
-.notificacao-conteudo div {
-    flex: 1;
-}
-
-.notificacao-conteudo strong {
-    color: #00ff88;
-    font-size: 16px;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.notificacao-conteudo p {
-    color: #b8b8d1;
-    font-size: 14px;
-    margin: 0;
-}
-
-.notificacao-fechar {
-    background: transparent;
-    border: none;
-    color: #b8b8d1;
-    cursor: pointer;
-    padding: 5px;
-    transition: color 0.3s;
-}
-
-.notificacao-fechar:hover {
-    color: #ff5555;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Indicador de status no dashboard */
-.status-indicador {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Card especial de status */
-.card-status-sistema {
-    position: relative;
-    overflow: hidden;
-}
-
-.card-status-sistema::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #00ff88, #00ccff);
-    animation: statusPulse 2s infinite;
-}
-
-@keyframes statusPulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-}
-`;
-document.head.appendChild(estilosNotificacao);
-
-// ============================================
-// MODIFICAÇÕES NO CÓDIGO EXISTENTE
-// ============================================
-
-// 1. Na inicialização, adicionar:
-document.addEventListener('DOMContentLoaded', function() {
-    // ... seu código existente ...
-    
-    // Inicializar sistema de eleição
-    setTimeout(() => inicializarSistemaEleicao(), 1000);
-    
-    // Event listeners corrigidos
-    document.getElementById('btnAlternarEleicao').addEventListener('click', alternarStatusEleicao);
-    
-    document.getElementById('selectTipoEleicao').addEventListener('change', function() {
-        const novoTipo = this.value;
-        if (novoTipo) {
-            alterarTipoEleicao(novoTipo);
-        }
-    });
-});
-
-// 2. Modificar a função de envio de candidatura:
-async function enviarCandidatura() {
-    // Verificar se sistema está aberto
-    if (!validarCandidaturaPodeSerEnviada()) {
-        return;
-    }
-    
-    // ... resto do código de envio ...
-}
-
-// 3. Adicionar verificação no formulário:
-function configurarValidacaoFormulario() {
-    // Verificar status ao carregar formulário
-    const formCandidatura = document.getElementById('candidatura');
-    if (formCandidatura) {
-        const observer = new MutationObserver(() => {
-            if (formCandidatura.classList.contains('ativo')) {
-                const btnEnviar = document.getElementById('btnEnviarCandidatura');
-                if (btnEnviar) {
-                    btnEnviar.disabled = !estadoSistema.eleicaoAberta;
-                    if (!estadoSistema.eleicaoAberta) {
-                        btnEnviar.title = "Sistema de candidaturas fechado";
-                        btnEnviar.style.opacity = "0.6";
-                    }
-                }
-            }
-        });
-        observer.observe(formCandidatura, { attributes: true, attributeFilter: ['class'] });
-    }
-}
-
-// 4. Adicionar indicador de status no dashboard:
-function adicionarIndicadorStatusDashboard() {
-    const dashboardHeader = document.querySelector('#dashboard .filtros-titulo');
-    if (dashboardHeader) {
-        const indicador = document.createElement('div');
-        indicador.className = 'status-indicador';
-        indicador.id = 'dashboardStatusIndicador';
-        indicador.style.cssText = `
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 11px;
-        `;
-        dashboardHeader.style.position = 'relative';
-        dashboardHeader.appendChild(indicador);
-        atualizarIndicadoresStatus();
-    }
-}
-
-// 5. Adicionar card de status no dashboard:
-function adicionarCardStatusDashboard() {
-    const dashboardCards = document.querySelector('.dashboard-cards');
-    if (dashboardCards) {
-        const cardStatus = document.createElement('div');
-        cardStatus.className = 'card card-status-sistema';
-        cardStatus.innerHTML = `
-            <div class="card-titulo">
-                <i class="fas fa-satellite-dish"></i>
-                STATUS DO SISTEMA
-            </div>
-            <div class="card-valor" id="cardStatusValor">
-                ${estadoSistema.eleicaoAberta ? 'ONLINE' : 'OFFLINE'}
-            </div>
-            <div class="card-detalhe" id="cardStatusDetalhe">
-                ${estadoSistema.tipoEleicaoAtual ? 
-                    `Tipo: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}` : 
-                    'Tipo não definido'}
-            </div>
-            <div class="card-detalhe mt-10">
-                <small>Atualizado: ${new Date().toLocaleTimeString()}</small>
-            </div>
-        `;
-        dashboardCards.insertBefore(cardStatus, dashboardCards.firstChild);
-    }
-}
-
-// 6. Atualizar periodicamente o status
-function iniciarAtualizacaoPeriodica() {
-    setInterval(() => {
-        if (estadoSistema.eleicaoAberta) {
-            const cardValor = document.getElementById('cardStatusValor');
-            const cardDetalhe = document.getElementById('cardStatusDetalhe');
-            if (cardValor) cardValor.textContent = 'ONLINE';
-            if (cardDetalhe) {
-                cardDetalhe.textContent = estadoSistema.tipoEleicaoAtual ? 
-                    `Tipo: ${estadoSistema.tipoEleicaoAtual === 'municipal' ? 'Eleição Municipal' : 'Eleição Federal'}` : 
-                    'Tipo não definido';
-            }
-        }
-    }, 30000); // Atualizar a cada 30 segundos
-}
-
-// ============================================
-// FUNÇÃO DE RESET DE SISTEMA (APENAS TSE)
-// ============================================
-async function resetarSistemaEleicao() {
-    if (!confirm("⚠️ ATENÇÃO: Isso irá resetar todo o sistema de eleição. Tem certeza?")) {
-        return;
-    }
-    
-    if (!estadoSistema.usuarioAutenticado || estadoSistema.tipoUsuario !== 'tse') {
-        mostrarMensagem("❌ Apenas o TSE pode resetar o sistema", "erro");
-        return;
-    }
-    
-    try {
-        // Resetar configuração
-        await configEleicaoRef.update({
-            eleicaoAberta: false,
-            tipoEleicao: null,
-            ultimaAtualizacao: new Date().toISOString(),
-            atualizadoPor: estadoSistema.usuarioInfo.nome,
-            reset: {
-                data: new Date().toISOString(),
-                usuario: estadoSistema.usuarioInfo.nome,
-                motivo: "Reset manual pelo TSE"
-            }
-        });
-        
-        // Atualizar estado local
-        estadoSistema.eleicaoAberta = false;
-        estadoSistema.tipoEleicaoAtual = null;
-        
-        atualizarStatusEleicaoUI();
-        
-        mostrarMensagem("🔄 Sistema resetado com sucesso!", "sucesso");
-        
-    } catch (error) {
-        console.error("❌ Erro ao resetar sistema:", error);
-        mostrarMensagem("Erro ao resetar sistema", "erro");
-    }
-}
-
-// ============================================
-// ADICIONAR BOTÃO DE RESET NA INTERFACE TSE
-// ============================================
-function adicionarControleReset() {
-    const gerenciamentoContent = document.getElementById('conteudoGerenciamento');
-    if (gerenciamentoContent && estadoSistema.tipoUsuario === 'tse') {
-        // Adicionar botão de reset
-        const resetButton = document.createElement('button');
-        resetButton.className = 'btn btn-pequeno';
-        resetButton.style.cssText = `
-            background: linear-gradient(135deg, #ff5555, #ff0000);
-            color: white;
-            margin-left: 10px;
-        `;
-        resetButton.innerHTML = '<i class="fas fa-redo"></i> Resetar Sistema';
-        resetButton.addEventListener('click', resetarSistemaEleicao);
-        
-        // Encontrar o card de status e adicionar o botão
-        const statusCard = document.querySelector('.card .card-detalhe');
-        if (statusCard) {
-            statusCard.appendChild(resetButton);
-        }
-    }
-}
-
-// ============================================
-// INICIALIZAÇÃO COMPLETA
-// ============================================
-function inicializarSistemaCompleto() {
-    console.log("🚀 Iniciando sistema completo...");
-    
-    // 1. Inicializar Firebase
-    inicializarFirebase();
-    
-    // 2. Inicializar sistema de eleição
-    inicializarSistemaEleicao();
-    
-    // 3. Configurar validação do formulário
-    configurarValidacaoFormulario();
-    
-    // 4. Adicionar indicadores no dashboard
-    adicionarIndicadorStatusDashboard();
-    adicionarCardStatusDashboard();
-    
-    // 5. Iniciar atualização periódica
-    iniciarAtualizacaoPeriodica();
-    
-    // 6. Verificar se é TSE para adicionar controles extras
-    if (estadoSistema.tipoUsuario === 'tse') {
-        adicionarControleReset();
-    }
-    
-    console.log("✅ Sistema inicializado com sucesso!");
-}
-
-// Chame esta função no DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Seu código existente...
-    
-    // Depois de tudo carregado
-    setTimeout(() => inicializarSistemaCompleto(), 2000);
-});
-
-// ============================================
-// DEBUG E LOGS DO SISTEMA
-// ============================================
-function mostrarLogsSistema() {
-    console.log("=== SISTEMA DE ELEIÇÃO ===");
-    console.log("Status:", estadoSistema.eleicaoAberta ? "ONLINE" : "OFFLINE");
-    console.log("Tipo:", estadoSistema.tipoEleicaoAtual || "Não definido");
-    console.log("Usuário:", estadoSistema.usuarioInfo?.nome || "Não autenticado");
-    console.log("Tipo Usuário:", estadoSistema.tipoUsuario || "Nenhum");
-    console.log("========================");
-}
-
-// Adicionar botão de debug (apenas desenvolvimento)
-if (window.location.hostname === 'localhost') {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = "🔧 Debug Sistema";
-    debugBtn.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        z-index: 9999;
-        padding: 10px;
-        background: #333;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    `;
-    debugBtn.addEventListener('click', mostrarLogsSistema);
-    document.body.appendChild(debugBtn);
-}
 
         function carregarDadosIniciais() {
             // Carregar estados
@@ -3725,7 +2894,7 @@ if (window.location.hostname === 'localhost') {
                     return;
                 }
                 
-                // Verificar se já está na coligação
+                // VERIFICAR DUPLICIDADE NA COLIGAÇÃO
                 if (estadoSistema.coligacao.includes(partidoSelecionado)) {
                     mostrarMensagem("Este partido já está na coligação", "aviso");
                     return;
@@ -4501,8 +3670,8 @@ if (window.location.hostname === 'localhost') {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td colspan="7" class="texto-centro" style="padding: 40px;">
-                        <i class="fas fa-search" style="font-size: 24px; color: var(--silver); margin-bottom: 10px;"></i>
-                        <div style="color: var(--silver);">Nenhuma candidatura encontrada</div>
+                        <i class="fas fa-search" style="font-size: 24px; color: var(--text-secondary); margin-bottom: 10px;"></i>
+                        <div style="color: var(--text-secondary);">Nenhuma candidatura encontrada</div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -4539,7 +3708,7 @@ if (window.location.hostname === 'localhost') {
                     <td>
                         ${candidatura.fotoUrl ? 
                             `<img src="${candidatura.fotoUrl}" class="foto-candidato-tabela" alt="Foto">` : 
-                            `<div class="foto-candidato-tabela" style="background: var(--deep-blue); display: flex; align-items: center; justify-content: center;">
+                            `<div class="foto-candidato-tabela" style="background: var(--card-bg); display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-user"></i>
                             </div>`
                         }
@@ -4567,12 +3736,16 @@ if (window.location.hostname === 'localhost') {
             const usuario = document.getElementById('tseUsuario').value.trim();
             const senha = document.getElementById('tseSenha').value;
             
-            // Verificação básica (em produção, usar Firebase Auth)
-            if (usuario === "tse_admin" && senha === "Brookasil2026!") {
+            // Lista de presidentes TSE e senhas
+            const presidentesTSE = {
+                "Tutu Protásio": "Brookasil1234"
+            };
+            
+            if (usuario === "Tutu Protásio" && senha === presidentesTSE[usuario]) {
                 estadoSistema.usuarioAutenticado = true;
                 estadoSistema.tipoUsuario = "tse";
                 estadoSistema.usuarioInfo = {
-                    nome: "Administrador TSE",
+                    nome: "Tutu Protásio",
                     cargo: "PRESIDENTE DO TSE NACIONAL"
                 };
                 
@@ -4598,27 +3771,60 @@ if (window.location.hostname === 'localhost') {
                 return;
             }
             
-            // Verificação básica (em produção, usar Firebase Auth)
-            const senhaEsperada = `tre_${cidade.toLowerCase().replace(/\s+/g, '_')}_2026`;
+            // Mapeamento de presidentes dos TREs
+            const presidentesTRE = {
+                "BROOKHAVEN": {
+                    "Cidade Eleitoral": { nome: "Tutu Protásio", senha: "tutuCE" },
+                    "Liberty City": { nome: "Ronaldo Caiado", senha: "ronaldoLC" }
+                },
+                "NOVACORE": {
+                    "Nexaville": { nome: "William Harris", senha: "williamNV" },
+                    "Solária": { nome: "Ryan Mendonça", senha: "ryanSL" }
+                },
+                "CASTERÍBER": {
+                    "Castelo Verde": { nome: "Henrique Camilote", senha: "henriqueCV" },
+                    "Monte Prata": { nome: "Jacinto Leite", senha: "jacintoMP" }
+                },
+                "FORTEMEGA": {
+                    "Marinha City": { nome: "Lucas Santos", senha: "lucasMC" },
+                    "Porto Rubi": { nome: "Davi Zavarisi", senha: "daviPR" }
+                },
+                "FLORÊMIX": {
+                    "Florápolis": { nome: "King Bacon", senha: "kingFL" },
+                    "Riomarina": { nome: "Pedro Camargo", senha: "pedroRM" }
+                },
+                "BRAVILAND": {
+                    "Soberana": { nome: "Alex Ferreira", senha: "alexSB" },
+                    "Vila Coletiva": { nome: "Anderson Almeida", senha: "andersonVC" }
+                }
+            };
             
-            if (senha === senhaEsperada) {
-                estadoSistema.usuarioAutenticado = true;
-                estadoSistema.tipoUsuario = "tre";
-                estadoSistema.usuarioInfo = {
-                    nome: usuario,
-                    cargo: `PRESIDENTE DO TRE ${cidade}`,
-                    estado: estado,
-                    cidade: cidade
-                };
+            // Verificar se o estado e cidade existem no mapeamento
+            if (presidentesTRE[estado] && presidentesTRE[estado][cidade]) {
+                const presidente = presidentesTRE[estado][cidade];
                 
-                document.getElementById('usuarioNome').textContent = estadoSistema.usuarioInfo.nome;
-                document.getElementById('usuarioCargo').textContent = estadoSistema.usuarioInfo.cargo;
-                
-                mostrarMensagem(`🔓 ACESSO CONCEDIDO: TRE ${cidade}`, "sucesso");
-                navegarParaAba('analise');
-                
+                // Verificar credenciais
+                if (usuario === presidente.nome && senha === presidente.senha) {
+                    estadoSistema.usuarioAutenticado = true;
+                    estadoSistema.tipoUsuario = "tre";
+                    estadoSistema.usuarioInfo = {
+                        nome: presidente.nome,
+                        cargo: `PRESIDENTE DO TRE ${cidade}`,
+                        estado: estado,
+                        cidade: cidade
+                    };
+                    
+                    document.getElementById('usuarioNome').textContent = estadoSistema.usuarioInfo.nome;
+                    document.getElementById('usuarioCargo').textContent = estadoSistema.usuarioInfo.cargo;
+                    
+                    mostrarMensagem(`🔓 ACESSO CONCEDIDO: TRE ${cidade}`, "sucesso");
+                    navegarParaAba('analise');
+                    
+                } else {
+                    mostrarMensagem("❌ ACESSO NEGADO: Credenciais inválidas", "erro");
+                }
             } else {
-                mostrarMensagem("❌ ACESSO NEGADO: Credenciais inválidas", "erro");
+                mostrarMensagem("❌ Jurisdição não encontrada", "erro");
             }
         }
 
@@ -4674,8 +3880,8 @@ if (window.location.hostname === 'localhost') {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td colspan="8" class="texto-centro" style="padding: 40px;">
-                        <i class="fas fa-clipboard-check" style="font-size: 24px; color: var(--silver); margin-bottom: 10px;"></i>
-                        <div style="color: var(--silver);">Nenhuma candidatura para análise</div>
+                        <i class="fas fa-clipboard-check" style="font-size: 24px; color: var(--text-secondary); margin-bottom: 10px;"></i>
+                        <div style="color: var(--text-secondary);">Nenhuma candidatura para análise</div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -4712,7 +3918,7 @@ if (window.location.hostname === 'localhost') {
                     <td>
                         ${candidatura.fotoUrl ? 
                             `<img src="${candidatura.fotoUrl}" class="foto-candidato-tabela" alt="Foto">` : 
-                            `<div class="foto-candidato-tabela" style="background: var(--deep-blue); display: flex; align-items: center; justify-content: center;">
+                            `<div class="foto-candidato-tabela" style="background: var(--card-bg); display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-user"></i>
                             </div>`
                         }
@@ -4733,7 +3939,7 @@ if (window.location.hostname === 'localhost') {
                             </button>
                             ${estadoSistema.tipoUsuario === 'tse' ? `
                                 <button class="btn btn-pequeno" 
-                                        style="background: var(--warning-red); color: white;"
+                                        style="background: var(--danger); color: white;"
                                         onclick="solicitarExclusao('${candidatura.id}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -4850,7 +4056,7 @@ if (window.location.hostname === 'localhost') {
                 btnRecusar.disabled = false;
                 motivoDecisao.disabled = false;
                 motivoDecisao.value = '';
-                btnRecusar.style.background = 'linear-gradient(135deg, var(--warning-red), #ff3366)';
+                btnRecusar.style.background = 'linear-gradient(135deg, var(--danger), #ff3366)';
             } else {
                 btnAprovar.disabled = true;
                 btnRecusar.disabled = true;
@@ -4858,9 +4064,9 @@ if (window.location.hostname === 'localhost') {
                 motivoDecisao.value = candidatura.motivoRecusa || '';
                 
                 if (candidatura.status === 'recusado') {
-                    btnRecusar.style.background = 'linear-gradient(135deg, var(--warning-red), #ff3366)';
+                    btnRecusar.style.background = 'linear-gradient(135deg, var(--danger), #ff3366)';
                 } else {
-                    btnRecusar.style.background = 'var(--silver)';
+                    btnRecusar.style.background = 'var(--text-secondary)';
                 }
             }
             
@@ -4982,9 +4188,9 @@ if (window.location.hostname === 'localhost') {
                 
                 let corIdeologia = "";
                 switch(partido.ideologia) {
-                    case "Direita": corIdeologia = "var(--electric-blue)"; break;
-                    case "Centro": corIdeologia = "var(--gold)"; break;
-                    case "Esquerda": corIdeologia = "var(--warning-red)"; break;
+                    case "Direita": corIdeologia = "var(--neon-blue)"; break;
+                    case "Centro": corIdeologia = "var(--warning)"; break;
+                    case "Esquerda": corIdeologia = "var(--danger)"; break;
                 }
                 
                 tr.innerHTML = `
@@ -5054,7 +4260,7 @@ if (window.location.hostname === 'localhost') {
                             <small>${candidatura.cargo} | ${candidatura.partido} | ${candidatura.numero}</small>
                         </div>
                         <button class="btn btn-pequeno" 
-                                style="background: var(--warning-red); color: white;"
+                                style="background: var(--danger); color: white;"
                                 onclick="solicitarExclusao('${candidatura.id}')">
                             <i class="fas fa-trash"></i> Excluir
                         </button>
@@ -5286,7 +4492,7 @@ if (window.location.hostname === 'localhost') {
             mensagem.style.marginBottom = '10px';
             mensagem.style.minWidth = '300px';
             mensagem.style.maxWidth = '400px';
-            mensagem.style.animation = 'hologramIn 0.3s ease';
+            mensagem.style.animation = 'slideIn 0.3s ease';
             
             let icone = '';
             switch(tipo) {
@@ -5330,4 +4536,4 @@ if (window.location.hostname === 'localhost') {
         detectarDispositivo();
     </script>
 </body>
-</html>
+    </html>
